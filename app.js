@@ -4,7 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const mongoose = require('mongoose')
 
-const db = 'mongodb://172.19.3.65:27017/weekTask'
+// const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
+const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
 
 /**
  * mongoose连接数据库
@@ -72,8 +73,6 @@ const router = require('./config/router')()
 app
   .use(router.routes())
   .use(router.allowedMethods());
-
-
 
 app.listen(1234)
 console.log('app started at port 1234...');

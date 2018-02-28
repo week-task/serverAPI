@@ -8,45 +8,44 @@ var uuid = require('uuid')
 import userHelper from '../dbhelper/userHelper'
 
 /**
- * 注册新用户
- * @param {Function} next          [description]
- * @yield {[type]}   [description]
+ * 登录
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
  */
-exports.signup = async(ctx, next) => {
-	var phoneNumber = xss(ctx.request.body.phoneNumber.trim())
-	var user = await User.findOne({
-		phoneNumber: phoneNumber
-	}).exec()
-	console.log(user)
+exports.login = async(ctx, next) => {
+	var userName = xss(ctx.request.body.username);
+	var password = xss(ctx.request.body.password);
 
-	var verifyCode = Math.floor(Math.random() * 10000 + 1)
-	console.log(phoneNumber)
-	if (!user) {
-		var accessToken = uuid.v4()
-
-		user = new User({
-			name:''
-		})
-	}
-	else {
-		user.verifyCode = verifyCode
-	}
-
-	try {
-		user = await user.save()
+	var user = await userHelper.findUser(userName);
+	console.log('user: ', user);
+	if(!user) {
+		// no user
+		console.log('用户不存在');
+		ctx.status = 200;
 		ctx.body = {
-			success: true
+			code: -1,
+			message: '用户不存在'
 		}
-	}
-	catch (e) {
+	} else if (user.password === password) {
+		// username and password are correct
+		ctx.status = 200;
 		ctx.body = {
-			success: false
-		}
-
-		return next
+			code: 0,
+			data: [],
+			message: '登录成功!'
+		};
+	} else {
+		// password is wrong
+		ctx.status = 200;
+		ctx.body = {
+			code: 500,
+			data: [],
+			message: '密码错误!'
+		};
 	}
 
-}
+};
 
 /**
  * 更新用户信息操作
@@ -89,24 +88,22 @@ exports.update = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.getUserList = async(ctx, next) => {
-	var data = await userHelper.findAllUsers()
-	// var obj = await userHelper.findByPhoneNumber({phoneNumber : '13525584568'})
-	// console.log('obj=====================================>'+obj)
-
+	var data = await userHelper.findAllUsers();
 	ctx.body = {
 		success: true,
 		data
 	}
 }
 exports.addUser = async(ctx, next) => {
+	var userName = xss(ctx.request.body.name);
+	var password = xss(ctx.request.body.password);
+	var role = xss(ctx.request.body.role);
 	var user = new User({
-		nickname: '测试用户',
-		avatar: 'http://ip.example.com/u/xxx.png',
-		phoneNumber: xss('13800138000'),
-		verifyCode: '5896',
-		accessToken: uuid.v4()
-	})
-	var user2 = await userHelper.addUser(user)
+		name: userName,
+		password: password,
+		role: role
+	});
+	var user2 = await userHelper.addUser(user);
 	if (user2) {
 		ctx.body = {
 			success: true,
