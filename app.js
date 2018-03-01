@@ -18,7 +18,7 @@ dbInfo.connection.on('error', function(err) {
     console.log('链接失败: ', err);
 });
 dbInfo.connection.on('open', function() {
-    console.log('chengg');
+    console.log('数据库连接成功!');
 });
 
 /**
@@ -57,12 +57,13 @@ const Koa = require('koa')
 const logger = require('koa-logger')
 const session = require('koa-session')
 const bodyParser = require('koa-bodyparser')
+const cors = require('koa-cors')
 const app = new Koa()
 
 app.use(logger())
 app.use(session(app))
 app.use(bodyParser())
-
+app.use(cors())
 
 /**
  * 使用路由转发请求
