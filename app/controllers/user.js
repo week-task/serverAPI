@@ -17,6 +17,15 @@ exports.login = async(ctx, next) => {
 	var userName = xss(ctx.request.body.username);
 	var password = xss(ctx.request.body.password);
 
+	if (userName === '' || password === '') {
+		ctx.status = 200;
+		ctx.body = {
+			code: -1,
+			message: '用户名或密码不能为空!'
+		};
+		return;
+	}
+
 	var user = await userHelper.findUser(userName);
 	console.log('user: ', user);
 	if(!user) {
