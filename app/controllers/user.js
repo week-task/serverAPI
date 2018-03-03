@@ -4,8 +4,10 @@ var xss = require('xss')
 var mongoose = require('mongoose')
 var User = mongoose.model('User')
 var uuid = require('uuid')
+var jsonwebtoken = require('jsonwebtoken')
 // var userHelper = require('../dbhelper/userHelper')
 import userHelper from '../dbhelper/userHelper'
+import {secret} from '../../config/index'
 
 /**
  * 登录
@@ -31,7 +33,7 @@ exports.login = async(ctx, next) => {
 	if(!user) {
 		// no user
 		console.log('用户不存在');
-		ctx.status = 200;
+		ctx.status = 401;
 		ctx.body = {
 			code: -1,
 			message: '用户不存在'
@@ -41,12 +43,18 @@ exports.login = async(ctx, next) => {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			data: [],
+			data: {
+				user: user,
+				token: jsonwebtoken.sign({
+					data: user,
+					exp: Math.floor(Date.now() / 1000) + (60 * 60) // 60 seconds * 60 minutes = 1 hour
+				}, secret)
+			},
 			message: '登录成功!'
 		};
 	} else {
 		// password is wrong
-		ctx.status = 200;
+		ctx.status = 500;
 		ctx.body = {
 			code: 500,
 			data: [],

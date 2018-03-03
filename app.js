@@ -58,8 +58,14 @@ const logger = require('koa-logger')
 const session = require('koa-session')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa-cors')
+const jwt = require('koa-jwt')
 const app = new Koa()
 
+// import {secret} from './config/index';
+const secret = require('./config/index').secret;
+
+// 加入koa-jwt token机制
+app.use(jwt({secret,}).unless({path: [/\/login/]}))
 app.use(logger())
 app.use(session(app))
 app.use(bodyParser())
