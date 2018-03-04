@@ -4,8 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const mongoose = require('mongoose')
 
-// const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
-const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
+const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
+// const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
 
 /**
  * mongoose连接数据库

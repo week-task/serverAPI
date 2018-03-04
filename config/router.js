@@ -3,6 +3,7 @@
 const Router = require('koa-router')
 const User = require('../app/controllers/user')
 const Project = require('../app/controllers/project')
+const Task = require('../app/controllers/task')
 const App = require('../app/controllers/app')
 
 module.exports = function () {
@@ -16,6 +17,7 @@ module.exports = function () {
 
 	router.get('/getProjectList', Project.getProjectList);
 	router.post('/project/add', Project.addProject);
+	router.post('/task/add', Task.addTask);
 
 	return router
 }

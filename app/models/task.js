@@ -16,9 +16,10 @@ var TaskSchema = new Schema({
 	project_id: String,
 	progress: Number,
 	status: String,
-	remark: String
-	// create_at: Date,
-	// updated_at: Date
+	remark: String,
+	period: String, // task属于周报哪个期数
+	create_at: String,
+	update_at: String
 },{collection:'task'});
 
 // Defines a pre hook for the document.
