@@ -51,3 +51,13 @@ exports.addTask = async(ctx, next) => {
 		}
 	}
 }
+
+exports.getTaskListByPeriod = async(ctx, next) => {
+	var period = xss(ctx.request.body.period);
+	var data = await TaskHelper.findTaskByPeriod(period);
+	ctx.body = {
+		code: 0,
+		data: data,
+		message: '获取成功'
+	}
+}

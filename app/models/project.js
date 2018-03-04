@@ -11,6 +11,7 @@ var Schema = mongoose.Schema;
  * @type {mongoose}
  */
 var ProjectSchema = new Schema({
+	_id: Schema.Types.ObjectId,
 	name: String
 	// create_at: Date,
 	// updated_at: Date

@@ -25,14 +25,15 @@ const findAllTasks = async () => {
  * 查找相关task
  * @return {[type]} [description]
  */
-const findTask = async (name) => {
-	var query = Task.findOne({name});
-	var res = null;
-	await query.exec(function(err, task) {
+const findTaskByPeriod = async (period) => {
+	var query = Task.find({"period": period});
+	var res = [];
+	await query.populate(['user_id','project_id']).exec(function(err, tasks) {
+		console.log(err + ' ,,,, ' + tasks);
 		if(err) {
-			res = {}
+			res = []
 		}else {
-			res = task
+			res = tasks
 		}
 	})
 	return res;
@@ -51,6 +52,6 @@ const addTask = async (task) => {
 
 module.exports = {
 	findAllTasks,
-	findTask,
+	findTaskByPeriod,
 	addTask
 };

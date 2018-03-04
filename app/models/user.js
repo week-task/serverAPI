@@ -11,6 +11,7 @@ var Schema = mongoose.Schema;
  * @type {mongoose}
  */
 var UserSchema = new Schema({
+	_id: Schema.Types.ObjectId,
 	name: {
 		unique: true,
 		type: String
