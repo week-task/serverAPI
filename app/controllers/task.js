@@ -42,12 +42,12 @@ exports.addTask = async(ctx, next) => {
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	});
 	console.log('Task: => ', task);
-	// var task2 = await TaskHelper.addTask(task);
-	// if (task2) {
-	// 	ctx.body = {
-	// 		code: 0,
-	// 		data: task2,
-	// 		message: '保存成功'
-	// 	}
-	// }
+	var task2 = await TaskHelper.addTask(task);
+	if (task2) {
+		ctx.body = {
+			code: 0,
+			data: task2,
+			message: '保存成功'
+		}
+	}
 }

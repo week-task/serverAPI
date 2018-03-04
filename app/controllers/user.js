@@ -40,13 +40,21 @@ exports.login = async(ctx, next) => {
 		}
 	} else if (user.password === password) {
 		// username and password are correct
+		var userInfo = {
+			_id: user._id,
+			parent_id: user.parent_id,
+			name: user.name,
+			role: user.role,
+			project: user.project
+		};
+		console.log('userInfo:=> ', userInfo);
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
 			data: {
-				user: user,
+				user: userInfo,
 				token: jsonwebtoken.sign({
-					data: user,
+					data: userInfo,
 					exp: Math.floor(Date.now() / 1000) + (60 * 60) // 60 seconds * 60 minutes = 1 hour
 				}, secret)
 			},

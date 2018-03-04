@@ -59,11 +59,13 @@ const session = require('koa-session')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa-cors')
 const jwt = require('koa-jwt')
+const errorHandle = require('./middleware/errorHandle')
 const app = new Koa()
 
 // import {secret} from './config/index';
 const secret = require('./config/index').secret;
 
+app.use(errorHandle);
 // 加入koa-jwt token机制
 app.use(jwt({secret,}).unless({path: [/\/login/]}))
 app.use(logger())

@@ -16,7 +16,9 @@ var UserSchema = new Schema({
 		type: String
 	},
 	password: String,
-	role: String
+	role: Number,
+	parent_id: String,
+	project: String
 	// create_at: Date,
 	// updated_at: Date
 },{collection:'user'});
