@@ -32,8 +32,8 @@ exports.addTask = async(ctx, next) => {
 	var Remark = xss(ctx.request.body.remark);
 	var task = new Task({
 		name: TaskName,
-		user_id: UserId,
-		project_id: ProjectId,
+		user: UserId,
+		project: ProjectId,
 		progress: Progress,
 		status: Status,
 		remark: Remark,
@@ -54,10 +54,79 @@ exports.addTask = async(ctx, next) => {
 
 exports.getTaskListByPeriod = async(ctx, next) => {
 	var period = xss(ctx.request.body.period);
-	var data = await TaskHelper.findTaskByPeriod(period);
+	var userId = xss(ctx.request.body.userid);
+	var userName = xss(ctx.request.body.username);
+	var userRole = xss(ctx.request.body.userrole);
+
+	var params = {
+		period: period,
+		userId: userId,
+		userName: userName,
+		userRole: userRole
+	};
+
+	var data = await TaskHelper.findTaskByPeriod(params);
+	console.log('tasklistbyperiod => ', data);
+	// 重新组装结构,使其能为前端服务
+	var projects = [];
+	var tempObj = {};
+	var statusZh = {
+		'0': '开发中',
+		'1': '已提测',
+		'2': '已上线'
+	};
+
+	// get the relevant projects
+	for (var i = 0, size = data.length; i < size; i++) {
+		if (!tempObj[data[i].project.name]) {
+			var item = {
+				project: data[i].project.name,
+				selected: [],
+				data: []
+			};
+			projects.push(item);
+			tempObj[data[i].project.name] = 1;
+		}
+	}
+	console.log(projects);
+	// init the dataAfter constructor
+	// for (var j = 0, jSize = projects.length; j < jSize; j++) {
+	// 	var item = {
+	// 		project: projects[j],
+	// 		selected: [],
+	// 		data: []
+	// 	};
+	// 	dataAfter.push(item);
+	// }
+
+	for (var m = 0, mSize = data.length; m < mSize; m++) {
+		var mItem = data[m];
+		for (var n = 0, nSize = projects.length; n < nSize; n++) {
+			var nItem = projects[n];
+			console.log('mItem ', mItem);
+			console.log('nItem ', nItem);
+			if (mItem.project.name === nItem.project) {
+				nItem.data.push({
+					id: mItem._id,
+					name: mItem.name,
+					user: mItem.user,
+					project: mItem.project,
+					progress: mItem.progress + '%',
+					status: statusZh[mItem.status],
+					remark: mItem.remark,
+					period: mItem.period,
+					create_at: mItem.create_at,
+					update_at: mItem.update_at
+				});
+			}
+		}
+	}
+
+
+
 	ctx.body = {
 		code: 0,
-		data: data,
+		data: projects,
 		message: '获取成功'
 	}
 }

@@ -12,8 +12,8 @@ var Schema = mongoose.Schema;
  */
 var TaskSchema = new Schema({
 	name: String,
-	user_id: {type: Schema.Types.ObjectId, ref: 'User', required: true},
-	project_id: {type: Schema.Types.ObjectId, ref: 'Project', required: true},
+	user: {type: Schema.Types.ObjectId, ref: 'User'},
+	project: {type: Schema.Types.ObjectId, ref: 'Project'},
 	progress: Number,
 	status: String,
 	remark: String,
