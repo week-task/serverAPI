@@ -23,12 +23,15 @@ exports.getProjectList = async(ctx, next) => {
 exports.addProject = async(ctx, next) => {
 	var projectName = xss(ctx.request.body.name);
 	var project = new Project({
+		_id: new mongoose.Types.ObjectId(),
 		name: projectName
 	});
 	var project2 = await projectHelper.addProject(project);
 	if (project2) {
+		ctx.status = 200;
 		ctx.body = {
-			success: true,
+			code: 0,
+			message: '获取成功',
 			data: project2
 		}
 	}

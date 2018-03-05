@@ -122,11 +122,16 @@ exports.getUserList = async(ctx, next) => {
 exports.addUser = async(ctx, next) => {
 	var userName = xss(ctx.request.body.name);
 	var password = xss(ctx.request.body.password);
+	var project = xss(ctx.request.body.project);
+	var parent = xss(ctx.request.body.parent);
 	var role = xss(ctx.request.body.role);
 	var user = new User({
+		_id: new mongoose.Types.ObjectId(),
 		name: userName,
 		password: password,
-		role: role
+		role: role,
+		parent: parent,
+		project: project
 	});
 	var user2 = await userHelper.addUser(user);
 	if (user2) {

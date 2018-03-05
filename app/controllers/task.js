@@ -42,6 +42,7 @@ exports.addTask = async(ctx, next) => {
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	});
 	console.log('Task: => ', task);
+
 	var task2 = await TaskHelper.addTask(task);
 	if (task2) {
 		ctx.body = {
@@ -110,6 +111,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 					id: mItem._id,
 					name: mItem.name,
 					user: mItem.user,
+					username: mItem.user.name,
 					project: mItem.project,
 					progress: mItem.progress + '%',
 					status: statusZh[mItem.status],

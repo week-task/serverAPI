@@ -41,71 +41,47 @@ const findTaskByPeriod = async (params) => {
 				res = tasks;
 			}
 		})
-	} else if (uRole === 1) {
+	} else {
 		// query = Task.find({"period": params.period});
 
-		query = User.find({"parent": params.userId});
+		if (uRole === 1) {
+			query = User.find({"parent": params.userId});
+		} else {
+			query = User.find({"name": params.userName});
+		}
 		await query.exec((err, users) => {
-			if (err) {
-				res = [];
-			} else {
+			if (err) { res = []; }
+			else {
 				ausers = users;
 			}
 		});
-		queryInner = Task.find({user:{$in:ausers}});
+		queryInner = Task.find({user:{$in:ausers}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
 			console.log('query Tasks: ', tasks);
-			if (err2) {res = []} else {
-				res = tasks;
-			}
-		});
-		// User.find({"parent": params.userId}, async function (err, users) {
-		// 	console.log('err: ', err);
-		// 	console.log('users: ', users);
-		//
-		// 	if (err) {return []} else {
-		// 		// var auser = [];
-		// 		// for (var i = 0, size = users.length; i < size; i++) {
-		// 		// 	auser.push(users[i]._id);
-		// 		// }
-		// 		await Task.find({user:{$in:users}}).populate('user', 'name').populate('project').exec(function(err2, tasks) {
-		// 			console.log('err: ', err2);
-		// 			console.log('tasks: ', tasks);
-		// 			if (err2) {
-		// 				res = [];
-		// 			} else {
-		// 				res = tasks;
-		// 			}
-		// 		});
-		// 	}
-		//
-		// });
-	} else if (uRole === 2) {
-		// User.find({"name": params.userName}, function (err, users) {
-		// 	console.log('users: ', users);
-		// 	if (err) {return []} else {
-		// 		Task.find({"user":{$in:users}}).populate('user', 'name').populate('project').exec(function(err, tasks) {
-		// 			res = tasks;
-		// 		});
-		// 	}
-		// });
-
-		query = User.find({"name": params.userName});
-		await query.exec((err, users) => {
-			if (err) {
-				res = [];
-			} else {
-				ausers = users;
-			}
-		});
-		queryInner = Task.find({user:{$in:ausers}});
-		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
-			console.log('query Tasks: ', tasks);
-			if (err2) {res = []} else {
+			if (err2) {res = []}
+			else {
 				res = tasks;
 			}
 		});
 	}
+	// else if (uRole === 2) {
+	//
+	// 	query = User.find({"name": params.userName});
+	// 	await query.exec((err, users) => {
+	// 		if (err) { res = []; }
+	// 		else {
+	// 			ausers = users;
+	// 		}
+	// 	});
+	// 	queryInner = Task.find({user:{$in:ausers}, period: params.period});
+	// 	await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
+	// 		console.log('query Tasks: ', tasks);
+	// 		if (err2) {res = []}
+	// 		else {
+	// 			res = tasks;
+	// 		}
+	// 	});
+	// }
 	return res;
 };
 
