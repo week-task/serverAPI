@@ -104,8 +104,8 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		var mItem = data[m];
 		for (var n = 0, nSize = projects.length; n < nSize; n++) {
 			var nItem = projects[n];
-			console.log('mItem ', mItem);
-			console.log('nItem ', nItem);
+			// console.log('mItem ', mItem);
+			// console.log('nItem ', nItem);
 			if (mItem.project.name === nItem.project) {
 				nItem.data.push({
 					id: mItem._id,
@@ -113,8 +113,10 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 					user: mItem.user,
 					username: mItem.user.name,
 					project: mItem.project,
-					progress: mItem.progress + '%',
-					status: statusZh[mItem.status],
+					progress: mItem.progress,
+					progressPercent: mItem.progress + '%',
+					status: mItem.status,
+					statusZh: statusZh[mItem.status],
 					remark: mItem.remark,
 					period: mItem.period,
 					create_at: mItem.create_at,
@@ -124,11 +126,48 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		}
 	}
 
-
-
 	ctx.body = {
 		code: 0,
 		data: projects,
 		message: '获取成功'
+	}
+}
+exports.updateTaskById = async(ctx, next) => {
+	var id = xss(ctx.request.body.id);
+	var taskName = xss(ctx.request.body.name);
+	var userId = xss(ctx.request.body.user_id);
+	var projectId = xss(ctx.request.body.project_id);
+	var progress = xss(ctx.request.body.progress);
+	var status = xss(ctx.request.body.status);
+	var remark = xss(ctx.request.body.remark);
+	var params = {
+		id: id,
+		name: taskName,
+		project: projectId,
+		progress: progress,
+		status: status,
+		remark: remark,
+		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
+	};
+
+	console.log('update params ;;; ', params);
+
+	// TODO check the user info, if not same user, don't edit
+
+	var data = await TaskHelper.editTask(params);
+	console.log('edit done  => ', data);
+	if (data) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: data,
+			message: '修改成功'
+		}
+	} else {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: data
+		}
 	}
 }

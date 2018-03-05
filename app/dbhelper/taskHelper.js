@@ -95,9 +95,36 @@ const addTask = async (task) => {
 	return task
 };
 
+/**
+ * 编辑task
+ * @param  {[Task]} task [mongoose.model('Task')]
+ * @return {[type]}      [description]
+ */
+const editTask = async (params) => {
+	var query = Task.findByIdAndUpdate(params.id, {
+		name:params.name,
+		project:params.project,
+		progress:params.progress,
+		status:params.status,
+		remark:params.remark,
+		update_at:params.update_at,
+	});
+	var res = [];
+	await query.exec((err, task) => {
+		console.log(err + ' ===== ' + task);
+		if (err) {
+			res = [];
+		} else {
+			res = task;
+		}
+	});
+	return res;
+};
+
 
 module.exports = {
 	findAllTasks,
 	findTaskByPeriod,
-	addTask
+	addTask,
+	editTask
 };
