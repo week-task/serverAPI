@@ -21,6 +21,23 @@ const findAllTasks = async () => {
 	})
 	return res
 }
+/**
+ * 根据ID查找task
+ * @return {[type]} [description]
+ */
+const findTaskById = async (id) => {
+	var query = Task.find({_id: id});
+	var res = [];
+	await query.exec(function(err, tasks) {
+		console.log('tasks:=> ',tasks);
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	})
+	return res
+}
 
 /**
  * 查找相关task
@@ -124,6 +141,7 @@ const editTask = async (params) => {
 
 module.exports = {
 	findAllTasks,
+	findTaskById,
 	findTaskByPeriod,
 	addTask,
 	editTask

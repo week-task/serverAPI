@@ -5,6 +5,7 @@ var xss = require('xss')
 var mongoose = require('mongoose')
 var Task = mongoose.model('Task')
 var jsonwebtoken = require('jsonwebtoken')
+import UserHelper from '../dbhelper/UserHelper'
 import TaskHelper from '../dbhelper/TaskHelper'
 
 moment().format();
@@ -41,7 +42,6 @@ exports.addTask = async(ctx, next) => {
 		create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	});
-	console.log('Task: => ', task);
 
 	var task2 = await TaskHelper.addTask(task);
 	if (task2) {
@@ -67,7 +67,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 	};
 
 	var data = await TaskHelper.findTaskByPeriod(params);
-	console.log('tasklistbyperiod => ', data);
+	// console.log('tasklistbyperiod => ', data);
 	// 重新组装结构,使其能为前端服务
 	var projects = [];
 	var tempObj = {};
@@ -89,16 +89,6 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 			tempObj[data[i].project.name] = 1;
 		}
 	}
-	console.log(projects);
-	// init the dataAfter constructor
-	// for (var j = 0, jSize = projects.length; j < jSize; j++) {
-	// 	var item = {
-	// 		project: projects[j],
-	// 		selected: [],
-	// 		data: []
-	// 	};
-	// 	dataAfter.push(item);
-	// }
 
 	for (var m = 0, mSize = data.length; m < mSize; m++) {
 		var mItem = data[m];
@@ -150,24 +140,30 @@ exports.updateTaskById = async(ctx, next) => {
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	};
 
-	console.log('update params ;;; ', params);
-
-	// TODO check the user info, if not same user, don't edit
+	var taskById = await TaskHelper.findTaskById(id);
+	if (taskById[0].user.toString() !== userId) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '不可以编辑其他人的任务'
+		};
+		return;
+	}
 
 	var data = await TaskHelper.editTask(params);
-	console.log('edit done  => ', data);
+	// console.log('edit done  => ', data);
 	if (data) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
 			data: data,
 			message: '修改成功'
-		}
+		};
 	} else {
 		ctx.status = 500;
 		ctx.body = {
 			code: -1,
 			message: data
-		}
+		};
 	}
 }
