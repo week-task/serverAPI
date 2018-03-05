@@ -44,7 +44,7 @@ const findProject = async (name) => {
  * @return {[type]}      [description]
  */
 const addProject = async (project) => {
-	var res = '';
+	var res = {code: 0};
 	await project.save().then((res) => {}).catch((err) => {
 		console.log('save err ', err);
 		res = err;

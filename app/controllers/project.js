@@ -28,13 +28,15 @@ exports.addProject = async(ctx, next) => {
 	});
 	var res = await projectHelper.addProject(project);
 
-	if (res.code = 11000) {
+	if (res.code === 11000) {
 		ctx.status = 500;
 		ctx.body = {
 			code: 0,
 			message: '真笨,这个项目名称早就有了'
-		}
-	} else if (res === '') {
+		};
+		return;
+	}
+	if (res.code === 0) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,

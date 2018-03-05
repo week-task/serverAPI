@@ -46,7 +46,7 @@ const findTaskById = async (id) => {
 const findTaskByPeriod = async (params) => {
 
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
-	console.log('userRole: ', params.userRole);
+	// console.log('userRole: ', params.userRole);
 
 	if (uRole === 0) {
 		query = Task.find({"period": params.period});

@@ -89,7 +89,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 			tempObj[data[i].project.name] = 1;
 		}
 	}
-
+	// 组装成前端需要的数据结构
 	for (var m = 0, mSize = data.length; m < mSize; m++) {
 		var mItem = data[m];
 		for (var n = 0, nSize = projects.length; n < nSize; n++) {
@@ -152,7 +152,16 @@ exports.updateTaskById = async(ctx, next) => {
 		ctx.status = 500;
 		ctx.body = {
 			code: -1,
-			message: '不可以编辑其他人的任务'
+			message: '别人的任务,不要瞎改!'
+		};
+		return;
+	}
+
+	if (taskById[0].period.toString() !== moment().format('w')) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '世上没有后悔药!历史不能改变!'
 		};
 		return;
 	}
@@ -189,7 +198,16 @@ exports.delTask = async(ctx, next) => {
 		ctx.status = 500;
 		ctx.body = {
 			code: -1,
-			message: '不可以删除其他人的任务'
+			message: '别人的任务,不要瞎删!'
+		};
+		return;
+	}
+
+	if (taskById[0].period.toString() !== moment().format('w')) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '世上没有后悔药!历史不能改变!'
 		};
 		return;
 	}
