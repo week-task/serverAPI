@@ -26,13 +26,20 @@ exports.addProject = async(ctx, next) => {
 		_id: new mongoose.Types.ObjectId(),
 		name: projectName
 	});
-	var project2 = await projectHelper.addProject(project);
-	if (project2) {
+	var res = await projectHelper.addProject(project);
+
+	if (res.code = 11000) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			message: '真笨,这个项目名称早就有了'
+		}
+	} else if (res === '') {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			message: '获取成功',
-			data: project2
+			data: [],
+			message: '新增项目成功'
 		}
 	}
 }

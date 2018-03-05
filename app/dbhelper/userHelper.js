@@ -11,7 +11,7 @@ const findAllUsers = async () => {
 	var query = User.find({});
 	var res = [];
 	await query.exec(function(err, users) {
-		console.log('users:=> ',users);
+		// console.log('users:=> ',users);
 		if (err) {
 			res = [];
 		} else {

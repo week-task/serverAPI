@@ -5,7 +5,6 @@ var xss = require('xss')
 var mongoose = require('mongoose')
 var Task = mongoose.model('Task')
 var jsonwebtoken = require('jsonwebtoken')
-import UserHelper from '../dbhelper/UserHelper'
 import TaskHelper from '../dbhelper/TaskHelper'
 
 moment().format();
@@ -81,6 +80,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 	for (var i = 0, size = data.length; i < size; i++) {
 		if (!tempObj[data[i].project.name]) {
 			var item = {
+				pid: data[i].project._id,
 				project: data[i].project.name,
 				selected: [],
 				data: []
@@ -116,12 +116,19 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		}
 	}
 
+	sortByPid(projects, 'pid');
+
 	ctx.body = {
 		code: 0,
 		data: projects,
 		message: '获取成功'
 	}
 }
+/**
+ * 编辑task
+ * @param ctx
+ * @param next
+ */
 exports.updateTaskById = async(ctx, next) => {
 	var id = xss(ctx.request.body.id);
 	var taskName = xss(ctx.request.body.name);
@@ -166,4 +173,54 @@ exports.updateTaskById = async(ctx, next) => {
 			message: data
 		};
 	}
+}
+
+/**
+ * 删除task
+ * @param ctx
+ * @param next
+ */
+exports.delTask = async(ctx, next) => {
+	var id = xss(ctx.request.body.id);
+	var userId = xss(ctx.request.body.user_id);
+
+	var taskById = await TaskHelper.findTaskById(id);
+	if (taskById[0].user.toString() !== userId) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '不可以删除其他人的任务'
+		};
+		return;
+	}
+
+	var data = await TaskHelper.delTask(id);
+	if (data === 'success') {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: data,
+			message: '删除成功'
+		};
+	} else {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: data
+		};
+	}
+}
+
+function sortByPid(objArr, field) {
+
+	// 指定排序的比较函数
+	const compare = (property) => {
+		return (obj1, obj2) => {
+			var value1 = obj1[property];
+			var value2 = obj2[property];
+			return value1 - value2;     // 升序
+		}
+	};
+
+	return objArr.sort(compare(field));
 }

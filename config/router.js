@@ -19,6 +19,7 @@ module.exports = function () {
 	router.post('/project/add', Project.addProject);
 	router.post('/task/add', Task.addTask);
 	router.post('/task/edit', Task.updateTaskById);
+	router.post('/task/del', Task.delTask);
 	router.post('/getTaskListByPeriod', Task.getTaskListByPeriod);
 
 	return router

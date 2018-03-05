@@ -29,7 +29,7 @@ const findTaskById = async (id) => {
 	var query = Task.find({_id: id});
 	var res = [];
 	await query.exec(function(err, tasks) {
-		console.log('tasks:=> ',tasks);
+		// console.log('tasks:=> ',tasks);
 		if (err) {
 			res = [];
 		} else {
@@ -51,7 +51,7 @@ const findTaskByPeriod = async (params) => {
 	if (uRole === 0) {
 		query = Task.find({"period": params.period});
 		await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
-			console.log(err + ' ,,,, ' + tasks);
+			// console.log(err + ' ,,,, ' + tasks);
 			if(err) {
 				res = [];
 			}else {
@@ -74,7 +74,7 @@ const findTaskByPeriod = async (params) => {
 		});
 		queryInner = Task.find({user:{$in:ausers}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
-			console.log('query Tasks: ', tasks);
+			// console.log('query Tasks: ', tasks);
 			if (err2) {res = []}
 			else {
 				res = tasks;
@@ -128,11 +128,30 @@ const editTask = async (params) => {
 	});
 	var res = [];
 	await query.exec((err, task) => {
-		console.log(err + ' ===== ' + task);
+		// console.log(err + ' ===== ' + task);
 		if (err) {
 			res = [];
 		} else {
 			res = task;
+		}
+	});
+	return res;
+};
+
+/**
+ * 删除task
+ * @param  {[Task]} task [mongoose.model('Task')]
+ * @return {[type]}      [description]
+ */
+const delTask = async (id) => {
+	var query = Task.remove({_id: id});
+	var res = undefined;
+	await query.exec((err, task) => {
+		// console.log(err + ' ===== ' + task);
+		if (err) {
+			res = err;
+		} else {
+			res = 'success';
 		}
 	});
 	return res;
@@ -144,5 +163,6 @@ module.exports = {
 	findTaskById,
 	findTaskByPeriod,
 	addTask,
-	editTask
+	editTask,
+	delTask
 };

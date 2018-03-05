@@ -12,7 +12,10 @@ var Schema = mongoose.Schema;
  */
 var ProjectSchema = new Schema({
 	_id: Schema.Types.ObjectId,
-	name: String
+	name: {
+		unique: true,
+		type: String
+	}
 	// create_at: Date,
 	// updated_at: Date
 },{collection:'project'});

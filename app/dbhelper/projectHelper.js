@@ -11,7 +11,7 @@ const findAllProjects = async () => {
 	var query = Project.find({});
 	var res = [];
 	await query.exec(function(err, projects) {
-		console.log('projects:=> ',projects);
+		// console.log('projects:=> ',projects);
 		if (err) {
 			res = [];
 		} else {
@@ -44,8 +44,12 @@ const findProject = async (name) => {
  * @return {[type]}      [description]
  */
 const addProject = async (project) => {
-	project = await project.save();
-	return project
+	var res = '';
+	await project.save().then((res) => {}).catch((err) => {
+		console.log('save err ', err);
+		res = err;
+	});
+	return res;
 };
 
 
