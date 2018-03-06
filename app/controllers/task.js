@@ -170,62 +170,8 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		userName: userName,
 		userRole: userRole
 	};
-
-
-
 	var data = await TaskHelper.findTaskByPeriod(params);
-	// console.log('tasklistbyperiod => ', data);
-	// 重新组装结构,使其能为前端服务
-	var projects = [];
-	var tempObj = {};
-	var statusZh = {
-		'0': '开发中',
-		'1': '已提测',
-		'2': '已上线'
-	};
-
-	// get the relevant projects
-	for (var i = 0, size = data.length; i < size; i++) {
-		if (!tempObj[data[i].project.name]) {
-			var item = {
-				pid: data[i].project._id,
-				project: data[i].project.name,
-				selected: [],
-				data: []
-			};
-			projects.push(item);
-			tempObj[data[i].project.name] = 1;
-		}
-	}
-	// 组装成前端需要的数据结构
-	for (var m = 0, mSize = data.length; m < mSize; m++) {
-		var mItem = data[m];
-		for (var n = 0, nSize = projects.length; n < nSize; n++) {
-			var nItem = projects[n];
-			// console.log('mItem ', mItem);
-			// console.log('nItem ', nItem);
-			if (mItem.project.name === nItem.project) {
-				nItem.data.push({
-					id: mItem._id,
-					name: mItem.name,
-					user: mItem.user,
-					username: mItem.user.name,
-					project: mItem.project,
-					progress: mItem.progress,
-					progressPercent: mItem.progress + '%',
-					status: mItem.status,
-					statusZh: statusZh[mItem.status],
-					remark: mItem.remark,
-					period: mItem.period,
-					create_at: mItem.create_at,
-					update_at: mItem.update_at
-				});
-			}
-		}
-	}
-
-	sortByPid(projects, 'pid');
-
+	var projects = renderProjects(data);
 	ctx.body = {
 		code: 0,
 		data: projects,
@@ -351,13 +297,70 @@ function sortByPid(objArr, field) {
 	return objArr.sort(compare(field));
 }
 
+function renderProjects (data) {
+	// 重新组装结构,使其能为前端服务
+	var projects = [];
+	var tempObj = {};
+	var statusZh = {
+		'0': '开发中',
+		'1': '已提测',
+		'2': '已上线'
+	};
+
+	// get the relevant projects
+	for (var i = 0, size = data.length; i < size; i++) {
+		if (!tempObj[data[i].project.name]) {
+			var item = {
+				pid: data[i].project._id,
+				project: data[i].project.name,
+				selected: [],
+				data: []
+			};
+			projects.push(item);
+			tempObj[data[i].project.name] = 1;
+		}
+	}
+	// 组装成前端需要的数据结构
+	for (var m = 0, mSize = data.length; m < mSize; m++) {
+		var mItem = data[m];
+		for (var n = 0, nSize = projects.length; n < nSize; n++) {
+			var nItem = projects[n];
+			// console.log('mItem ', mItem);
+			// console.log('nItem ', nItem);
+			if (mItem.project.name === nItem.project) {
+				nItem.data.push({
+					id: mItem._id,
+					name: mItem.name,
+					user: mItem.user,
+					username: mItem.user.name,
+					project: mItem.project,
+					progress: mItem.progress,
+					progressPercent: mItem.progress + '%',
+					status: mItem.status,
+					statusZh: statusZh[mItem.status],
+					remark: mItem.remark,
+					period: mItem.period,
+					create_at: mItem.create_at,
+					update_at: mItem.update_at
+				});
+			}
+		}
+	}
+
+	sortByPid(projects, 'pid');
+
+	return projects;
+}
+
 /**
  * 导出周报,格式为excel
  * @param ctx
  * @param next
  */
 exports.exportWeeklyReport = async (ctx, next) => {
-	var data = [];
+
+	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: moment().format('w')});
+	var data = renderProjects(preData);
 	var fileName = await xlsx.exportExcel(data);
 	console.log('callback excel ', fileName);
 	if(fileName) {

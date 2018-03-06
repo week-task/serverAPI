@@ -12,7 +12,6 @@ const findAllTasks = async () => {
 	var query = Task.find({});
 	var res = [];
 	await query.exec(function(err, tasks) {
-		console.log('tasks:=> ',tasks);
 		if (err) {
 			res = [];
 		} else {
@@ -69,7 +68,6 @@ const saveUnfinishTask = async (params) => {
 	var query = Task.save(params);
 	var res = [];
 	await query.exec(function(err, tasks) {
-		console.log(err+'---------'+tasks);
 		if (err) {
 			res = [];
 		} else {
@@ -80,13 +78,9 @@ const saveUnfinishTask = async (params) => {
 }
 
 const isExistTask = async (params) => {
-	console.log('params ', params);
-	// var query = Task.find({period: params.period, user: params.userId, name: params.name});
 	var query = Task.find({name: params.name, period: params.period, user: params.userId});
 	var res = [];
 	await query.exec((err, tasks) => {
-		console.log('err ', err);
-		console.log('tasks ', tasks);
 		if (err) {
 			res = [];
 		} else {
@@ -101,14 +95,11 @@ const isExistTask = async (params) => {
  * @return {[type]} [description]
  */
 const findTaskByPeriod = async (params) => {
-
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
-	// console.log('userRole: ', params.userRole);
 
 	if (uRole === 0) {
 		query = Task.find({"period": params.period});
 		await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
-			// console.log(err + ' ,,,, ' + tasks);
 			if(err) {
 				res = [];
 			}else {
@@ -117,7 +108,6 @@ const findTaskByPeriod = async (params) => {
 		})
 	} else {
 		// query = Task.find({"period": params.period});
-
 		if (uRole === 1) {
 			query = User.find({"parent": params.userId});
 		} else {
@@ -131,7 +121,6 @@ const findTaskByPeriod = async (params) => {
 		});
 		queryInner = Task.find({user:{$in:ausers}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
-			// console.log('query Tasks: ', tasks);
 			if (err2) {res = []}
 			else {
 				res = tasks;
