@@ -42,7 +42,7 @@ exports.login = async(ctx, next) => {
 		// username and password are correct
 		var userInfo = {
 			_id: user._id,
-			parent_id: user.parent_id,
+			parent_id: user.parent,
 			name: user.name,
 			role: user.role,
 			project: user.project

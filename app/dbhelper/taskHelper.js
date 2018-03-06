@@ -39,6 +39,63 @@ const findTaskById = async (id) => {
 	return res
 }
 
+const isCheckAndSave = async (params) => {
+	var query = Task.find({name: params.name, period: params.period, user: params.userId});
+	var res = [];
+	await query.exec((err, tasks) => {
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	});
+	return res;
+}
+
+const checkUnfinishTask = async (params) => {
+	var query = Task.find({period: parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId});
+	var res = [];
+	await query.exec((err, tasks) => {
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	});
+	return res;
+}
+
+const saveUnfinishTask = async (params) => {
+	var query = Task.save(params);
+	var res = [];
+	await query.exec(function(err, tasks) {
+		console.log(err+'---------'+tasks);
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	});
+	return res;
+}
+
+const isExistTask = async (params) => {
+	console.log('params ', params);
+	// var query = Task.find({period: params.period, user: params.userId, name: params.name});
+	var query = Task.find({name: params.name, period: params.period, user: params.userId});
+	var res = [];
+	await query.exec((err, tasks) => {
+		console.log('err ', err);
+		console.log('tasks ', tasks);
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	});
+	return res;
+}
+
 /**
  * 查找相关task
  * @return {[type]} [description]
@@ -108,8 +165,16 @@ const findTaskByPeriod = async (params) => {
  * @return {[type]}      [description]
  */
 const addTask = async (task) => {
-	task = await task.save();
+	var task = await task.save();
 	return task
+};
+/**
+ * 增加task
+ * @param  {[Task]} task [mongoose.model('Task')]
+ * @return {[type]}      [description]
+ */
+const addMultiTask = async (task) => {
+
 };
 
 /**
@@ -160,8 +225,13 @@ const delTask = async (id) => {
 
 module.exports = {
 	findAllTasks,
+	addMultiTask,
 	findTaskById,
 	findTaskByPeriod,
+	isExistTask,
+	isCheckAndSave,
+	checkUnfinishTask,
+	saveUnfinishTask,
 	addTask,
 	editTask,
 	delTask

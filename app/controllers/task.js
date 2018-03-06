@@ -42,14 +42,119 @@ exports.addTask = async(ctx, next) => {
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	});
 
+	// 检查新增的任务是不是存在
+	var isExistTask = await TaskHelper.isExistTask({name: TaskName, userId: UserId, period: moment().format('w')});
+
+	if (isExistTask.length > 0) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '该任务名称已存在!'
+		}
+		return;
+	}
+
 	var task2 = await TaskHelper.addTask(task);
 	if (task2) {
+		ctx.status = 200;
 		ctx.body = {
 			code: 0,
 			data: task2,
 			message: '保存成功'
 		}
 	}
+}
+
+/**
+ * 检查上一期未完成列表,并做本期copy处理
+ * @param ctx
+ * @param next
+ */
+exports.checkUnfinishTask = async(ctx, next) => {
+	var userId = xss(ctx.request.body.user_id);
+	var dataNo = 0;
+
+	var nowWeekOfYear = moment().format('w');
+
+	var preData = await TaskHelper.checkUnfinishTask({period: nowWeekOfYear, userId: userId});
+	// console.log('preData: => ', preData);
+
+	// for 循环一条一条对未完成的task列表进行检查
+	for (var i = 0, iSize = preData.length; i < iSize; i++) {
+		let item = preData[i];
+		let isExistTask = await TaskHelper.isExistTask({period: nowWeekOfYear, userId: userId, name: item.name});
+		// 如果在最新的一期已经存在该任务,就不用管了,
+		if (isExistTask.length > 0) {
+			console.log('最新一期已存在该任务');
+			continue;
+		} else if (isExistTask.length === 0) { // 如果最新的一期没有该未完成的任务,就新增到最新一期
+			let taskItem = new Task({
+				name: item.name,
+				user: item.user,
+				project: item.project,
+				progress: item.progress,
+				status: item.status,
+				remark: item.remark,
+				period: nowWeekOfYear,
+				create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+				update_at: moment().format("YYYY-MM-DD HH:mm:ss")
+			});
+			// console.log('taskItem ', taskItem);
+			let saveUnfinishToNew = await TaskHelper.addTask(taskItem);
+			// console.log('saveUnfinishToNew ', saveUnfinishToNew);
+			if (saveUnfinishToNew) {
+				dataNo += 1;
+			}
+		}
+	}
+
+
+	if (dataNo === 0) {
+		ctx.status = 200;
+		ctx.body = {
+			code: -1,
+			message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
+		}
+	} else {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
+		}
+	}
+
+
+
+
+	// //如果已经做了check并且已经保存到最新的一期,就不做后面的操作了
+	// if (isCheckAndSave) {
+	// 	return;
+	// }
+	//
+	//
+	// var saveUnfinishTask = [];
+	// for (var x = 0, xSize = preData.length; x < xSize; x++) {
+	// 	saveUnfinishTask.push({
+	// 		name: preData[x].name,
+	// 		user: preData[x].user,
+	// 		project: preData[x].project,
+	// 		progress: preData[x].progress,
+	// 		status: preData[x].status,
+	// 		remark: preData[x].remark,
+	// 		period: nowWeekOfYear,
+	// 		create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+	// 		update_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+	// 	});
+	// }
+	// console.log('saveUnfinishTask ', saveUnfinishTask);
+	//
+	// var saveUnfinishArr = await TaskHelper.saveUnfinishTask(saveUnfinishTask);
+	// console.log('saveUnfinishArr ', saveUnfinishArr);
+	// if (saveUnfinishArr && saveUnfinishArr.length > 0) {
+	// 	isInsertData = true;
+	//
+	// }
+
 }
 
 exports.getTaskListByPeriod = async(ctx, next) => {
@@ -64,6 +169,8 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		userName: userName,
 		userRole: userRole
 	};
+
+
 
 	var data = await TaskHelper.findTaskByPeriod(params);
 	// console.log('tasklistbyperiod => ', data);
