@@ -3,6 +3,7 @@
  */
 const fs = require('fs');
 const xlsx = require('better-xlsx');
+const moment = require('moment');
 
 function exportXlsx (data) {
 
@@ -60,12 +61,12 @@ function exportXlsx (data) {
 	return new Promise((resolve, reject) => {
 		file
 			.saveAs()
-			.pipe(fs.createWriteStream('www/exportFile/testexport.xlsx'))
+			.pipe(fs.createWriteStream('www/exportFile/第' + moment().format('w') + '周' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx'))
 			.on('err', (err) => {
 				reject(err);
 			})
 			.on('finish', () => {
-				resolve('exportFile/testexport.xlsx');
+				resolve('exportFile/第' + moment().format('w') + '周' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx');
 			})
 	});
 }
