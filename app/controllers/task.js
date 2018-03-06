@@ -5,6 +5,7 @@ var xss = require('xss')
 var mongoose = require('mongoose')
 var Task = mongoose.model('Task')
 var jsonwebtoken = require('jsonwebtoken')
+var xlsx = require('../util/export')
 import TaskHelper from '../dbhelper/TaskHelper'
 
 moment().format();
@@ -348,4 +349,31 @@ function sortByPid(objArr, field) {
 	};
 
 	return objArr.sort(compare(field));
+}
+
+/**
+ * 导出周报,格式为excel
+ * @param ctx
+ * @param next
+ */
+exports.exportWeeklyReport = async (ctx, next) => {
+	var data = [];
+	var fileName = await xlsx.exportExcel(data);
+	console.log('callback excel ', fileName);
+	if(fileName) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: {
+				url: fileName
+			},
+			message: '获取成功'
+		}
+	} else {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			message: '导出文件拉取失败'
+		}
+	}
 }
