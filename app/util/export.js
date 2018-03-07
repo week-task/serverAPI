@@ -5,12 +5,10 @@ const fs = require('fs');
 const xlsx = require('better-xlsx');
 const moment = require('moment');
 
-function exportXlsx (data) {
-
-	console.log('export data', data);
-
+function exportXlsx (data, period) {
 	const file = new xlsx.File();
-	const sheet = file.addSheet('sheet1');
+	const sheetName = moment().format('YYYY-MM-DD');
+	const sheet = file.addSheet(sheetName);
 	const header = sheet.addRow();
 	header.setHeightCM(0.8);
 	const headers = ['任务', '状态', '进度', '负责人', '备注'];
@@ -19,6 +17,7 @@ function exportXlsx (data) {
 		hc.value = headers[i];
 		hc.style.align.v = 'center';
 		hc.style.font.color = 'ff000000';
+		hc.style.font.bold = true;
 		hc.style.fill.bgColor = 'ff3399ff';
 	}
 
@@ -29,6 +28,9 @@ function exportXlsx (data) {
 		iCell.value = data[i].project;
 		iCell.hMerge = 4;
 		iCell.style.font.color = 'ff0099ff';
+		iCell.style.font.size = 16;
+		iCell.style.font.bold = true;
+		iCell.style.align.h = 'center';
 		for (let j = 0, jSize = data[i].data.length; j < jSize; j++) {
 			let item = data[i].data[j];
 			let jRow = sheet.addRow();
@@ -61,12 +63,12 @@ function exportXlsx (data) {
 	return new Promise((resolve, reject) => {
 		file
 			.saveAs()
-			.pipe(fs.createWriteStream('www/exportFile/第' + moment().format('w') + '周' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx'))
+			.pipe(fs.createWriteStream('www/exportFile/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx'))
 			.on('err', (err) => {
 				reject(err);
 			})
 			.on('finish', () => {
-				resolve('exportFile/第' + moment().format('w') + '周' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx');
+				resolve('exportFile/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx');
 			})
 	});
 }

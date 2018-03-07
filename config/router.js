@@ -22,7 +22,7 @@ module.exports = function () {
 	router.post('/task/del', Task.delTask);
 	router.post('/isFinished', Task.checkUnfinishTask);
 	router.post('/getTaskListByPeriod', Task.getTaskListByPeriod);
-	router.get('/export', Task.exportWeeklyReport);
+	router.post('/export', Task.exportWeeklyReport);
 
 	return router
 }

@@ -32,11 +32,11 @@ exports.login = async(ctx, next) => {
 	console.log('user: ', user);
 	if(!user) {
 		// no user
-		console.log('用户不存在');
+		// console.log('用户不存在');
 		ctx.status = 401;
 		ctx.body = {
 			code: -1,
-			message: '用户不存在'
+			message: '根本就没这个人'
 		}
 	} else if (user.password === password) {
 		// username and password are correct
@@ -66,44 +66,11 @@ exports.login = async(ctx, next) => {
 		ctx.body = {
 			code: 500,
 			data: [],
-			message: '密码错误!'
+			message: '密码都记不住了吗?'
 		};
 	}
 
 };
-
-/**
- * 更新用户信息操作
- * @param  {[type]}   ctx  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-exports.update = async(ctx, next) => {
-	var body = ctx.request.body
-	var user = ctx.session.user
-	var fields = 'avatar,gender,age,nickname,breed'.split(',')
-
-	fields.forEach(function (field) {
-		if (body[field]) {
-			user[field] = xss(body[field].trim())
-		}
-	})
-
-	user = await user.save()
-
-	ctx.body = {
-		success: true,
-		data: {
-			nickname: user.nickname,
-			accessToken: user.accessToken,
-			avatar: user.avatar,
-			age: user.age,
-			breed: user.breed,
-			gender: user.gender,
-			_id: user._id
-		}
-	}
-}
 
 
 /**

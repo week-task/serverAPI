@@ -359,9 +359,11 @@ function renderProjects (data) {
  */
 exports.exportWeeklyReport = async (ctx, next) => {
 
-	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: moment().format('w')});
+	var period = xss(ctx.request.body.period);
+
+	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period});
 	var data = renderProjects(preData);
-	var fileName = await xlsx.exportExcel(data);
+	var fileName = await xlsx.exportExcel(data, period);
 	console.log('callback excel ', fileName);
 	if(fileName) {
 		ctx.status = 200;
