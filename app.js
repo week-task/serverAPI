@@ -4,16 +4,23 @@ const fs = require('fs')
 const path = require('path')
 const mongoose = require('mongoose')
 
-const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
+const MONGO_HOST = process.env.IOT_MONGO_HOST || 'localhost';
+const mongoOptions = {
+    user: 'ioteams',
+    pass: 'ioteams123'
+};
+
+// const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
 // const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
-// const db = 'mongodb://****:27017/weekTask';// 连接线上mongoDB
+const db = 'mongodb://'+ MONGO_HOST +':27017/weekTask';// 连接线上mongoDB
 
 /**
  * mongoose连接数据库
  * @type {[type]}
  */
 mongoose.Promise = require('bluebird');
-var dbInfo = mongoose.connect(db);
+// var dbInfo = mongoose.connect(db);
+var dbInfo = mongoose.connect(db, mongoOptions);
 
 dbInfo.connection.on('error', function(err) {
     console.log('链接失败: ', err);
