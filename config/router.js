@@ -10,7 +10,7 @@ module.exports = function () {
 	var router = new Router({
 		prefix: '/api'
 	});
-
+	// router.get('/login',User.renderLogin);
 	router.get('/user/getUserList', User.getUserList);
 	router.post('/user/add', User.addUser);
 	router.post('/login', User.login);

@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 
 const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
 // const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
+// const db = 'mongodb://****:27017/weekTask';// 连接线上mongoDB
 
 /**
  * mongoose连接数据库
@@ -56,25 +57,24 @@ require('babel-register')
 const Koa = require('koa')
 const logger = require('koa-logger')
 const session = require('koa-session')
-// const koaStatic = require('koa-static')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa-cors')
 const jwt = require('koa-jwt')
 const errorHandle = require('./middleware/errorHandle')
 const app = new Koa()
-
-// import {secret} from './config/index';
 const secret = require('./config/index').secret;
 
 app.use(errorHandle);
 // 加入koa-jwt token机制
-app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/]}))
+app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/, /\//]}))
 app.use(logger())
 app.use(session(app))
+app.use(require('koa-static')(__dirname + '/www/dist/spa-mat'))
 app.use(require('koa-static')(__dirname + '/www'))
 app.use(bodyParser())
 app.use(cors())
 
+//console.log('__dirname', __dirname);
 /**
  * 使用路由转发请求
  * @type {[type]}
