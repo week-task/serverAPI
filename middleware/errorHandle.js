@@ -1,7 +1,7 @@
 /**
- * Created by luolinjia on 2018/3/4.
+ * koa-jwt拦截验证错误function
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
  */
-
 const errorHandle = function (ctx, next) {
 	return next().catch(function (err) {
 		if (err.status === 401) {

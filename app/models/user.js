@@ -24,19 +24,6 @@ var UserSchema = new Schema({
 	// updated_at: Date
 },{collection:'user'});
 
-// Defines a pre hook for the document.
-// UserSchema.pre('save', function (next) {
-// 	var currentDate = new Date();
-// 	this.updated_at = currentDate;
-//
-// 	if(!this.create_at) {
-// 		this.create_at = currentDate;
-// 	}
-//
-// 	next();
-// });
-
-
 /**
  * 定义模型User
  * 模型用来实现我们定义的模式，调用mongoose.model来编译Schema得到Model
@@ -46,7 +33,3 @@ var UserSchema = new Schema({
 var User = mongoose.model('User', UserSchema);
 
 module.exports = User;
-
-/**
- * nodejs中文社区这篇帖子对mongoose的用法总结的不错：https://cnodejs.org/topic/548e54d157fd3ae46b233502
- */

@@ -1,16 +1,18 @@
+/**
+ * 用户表接口controller
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ */
 'use strict'
 
 var xss = require('xss')
 var mongoose = require('mongoose')
 var User = mongoose.model('User')
-var uuid = require('uuid')
 var jsonwebtoken = require('jsonwebtoken')
-// var userHelper = require('../dbhelper/userHelper')
 import userHelper from '../dbhelper/userHelper'
 import {secret} from '../../config/index'
 
 /**
- * 登录
+ * 登录逻辑
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
@@ -29,10 +31,8 @@ exports.login = async(ctx, next) => {
 	}
 
 	var user = await userHelper.findUser(userName);
-	console.log('user: ', user);
+	// console.log('user: ', user);
 	if(!user) {
-		// no user
-		// console.log('用户不存在');
 		ctx.status = 401;
 		ctx.body = {
 			code: -1,
@@ -47,7 +47,6 @@ exports.login = async(ctx, next) => {
 			role: user.role,
 			project: user.project
 		};
-		console.log('userInfo:=> ', userInfo);
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
@@ -55,7 +54,7 @@ exports.login = async(ctx, next) => {
 				user: userInfo,
 				token: jsonwebtoken.sign({
 					data: userInfo,
-					exp: Math.floor(Date.now() / 1000) + (60 * 60) // 60 seconds * 60 minutes = 1 hour
+					exp: Math.floor(Date.now() / 1000) + (60 * 30) // 60 seconds * 30 minutes = 0.5 hour
 				}, secret)
 			},
 			message: '登录成功!'
@@ -72,20 +71,12 @@ exports.login = async(ctx, next) => {
 
 };
 
-
 /**
- * 数据库接口测试
- * @param  {[type]}   ctx  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
+ * 新增用户
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
  */
-exports.getUserList = async(ctx, next) => {
-	var data = await userHelper.findAllUsers();
-	ctx.body = {
-		success: true,
-		data
-	}
-}
 exports.addUser = async(ctx, next) => {
 	var userName = xss(ctx.request.body.name);
 	var password = xss(ctx.request.body.password);
@@ -102,18 +93,11 @@ exports.addUser = async(ctx, next) => {
 	});
 	var user2 = await userHelper.addUser(user);
 	if (user2) {
+		ctx.status = 200;
 		ctx.body = {
-			success: true,
-			data: user2
+			code: 0,
+			data: data,
+			message: '新增成功'
 		}
-	}
-}
-exports.deleteUser = async(ctx, next) => {
-	const phoneNumber = xss(ctx.request.body.phoneNumber.trim())
-	console.log(phoneNumber)
-	var data = await userHelper.deleteUser({phoneNumber})
-	ctx.body = {
-		success: true,
-		data
 	}
 }

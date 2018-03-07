@@ -1,66 +1,59 @@
-'use strict'
+/**
+ * 任务表接口controller
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ */
+'use strict';
 
-var moment = require('moment')
-var xss = require('xss')
-var mongoose = require('mongoose')
-var Task = mongoose.model('Task')
-var jsonwebtoken = require('jsonwebtoken')
-var xlsx = require('../util/export')
-import TaskHelper from '../dbhelper/TaskHelper'
-
-moment().format();
+var moment = require('moment');
+var xss = require('xss');
+var mongoose = require('mongoose');
+var Task = mongoose.model('Task');
+var xlsx = require('../util/export');
+import TaskHelper from '../dbhelper/taskHelper';
 
 /**
- * 数据库接口测试
+ * 新增任务
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-exports.getTaskList = async(ctx, next) => {
-	var data = await TaskHelper.findAllTasks();
-	ctx.body = {
-		code: 0,
-		data: data,
-		message: '获取成功'
-	}
-}
 exports.addTask = async(ctx, next) => {
-	var TaskName = xss(ctx.request.body.name);
-	var UserId = xss(ctx.request.body.user_id);
-	var ProjectId = xss(ctx.request.body.project_id);
-	var Progress = xss(ctx.request.body.progress);
-	var Status = xss(ctx.request.body.status);
-	var Remark = xss(ctx.request.body.remark);
+	var taskName = xss(ctx.request.body.name);
+	var userId = xss(ctx.request.body.user_id);
+	var projectId = xss(ctx.request.body.project_id);
+	var progress = xss(ctx.request.body.progress);
+	var status = xss(ctx.request.body.status);
+	var remark = xss(ctx.request.body.remark);
 	var task = new Task({
-		name: TaskName,
-		user: UserId,
-		project: ProjectId,
-		progress: Progress,
-		status: Status,
-		remark: Remark,
+		name: taskName,
+		user: userId,
+		project: projectId,
+		progress: progress,
+		status: status,
+		remark: remark,
 		period: moment().format('w'),
 		create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	});
 
 	// 检查新增的任务是不是存在
-	var isExistTask = await TaskHelper.isExistTask({name: TaskName, userId: UserId, period: moment().format('w')});
+	var isExistTask = await TaskHelper.isExistTask({name: taskName, userId: userId, period: moment().format('w')});
 
 	if (isExistTask.length > 0) {
 		ctx.status = 500;
 		ctx.body = {
 			code: -1,
 			message: '该任务名称已存在!'
-		}
+		};
 		return;
 	}
 
-	var task2 = await TaskHelper.addTask(task);
-	if (task2) {
+	var taskObj = await TaskHelper.addTask(task);
+	if (taskObj) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			data: task2,
+			data: taskObj,
 			message: '保存成功'
 		}
 	}
@@ -68,20 +61,18 @@ exports.addTask = async(ctx, next) => {
 
 /**
  * 检查上一期未完成列表,并做本期copy处理
- * @param ctx
- * @param next
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
  */
 exports.checkUnfinishTask = async(ctx, next) => {
 	var userId = xss(ctx.request.body.user_id);
 	var dataNo = 0;
-
 	var nowWeekOfYear = moment().format('w');
 
 	var preData = await TaskHelper.checkUnfinishTask({period: nowWeekOfYear, userId: userId});
-	// console.log('preData: => ', preData);
-
 	// for 循环一条一条对未完成的task列表进行检查
-	for (var i = 0, iSize = preData.length; i < iSize; i++) {
+	for (let i = 0, iSize = preData.length; i < iSize; i++) {
 		let item = preData[i];
 		let isExistTask = await TaskHelper.isExistTask({period: nowWeekOfYear, userId: userId, name: item.name});
 		// 如果在最新的一期已经存在该任务,就不用管了,
@@ -100,64 +91,40 @@ exports.checkUnfinishTask = async(ctx, next) => {
 				create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
 				update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 			});
-			// console.log('taskItem ', taskItem);
 			let saveUnfinishToNew = await TaskHelper.addTask(taskItem);
-			// console.log('saveUnfinishToNew ', saveUnfinishToNew);
 			if (saveUnfinishToNew) {
 				dataNo += 1;
 			}
 		}
 	}
 
+	ctx.status = 200;
+	ctx.body = {
+		code: dataNo === 0 ? -1 : 0,
+		message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
+	};
 
-	if (dataNo === 0) {
-		ctx.status = 200;
-		ctx.body = {
-			code: -1,
-			message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
-		}
-	} else {
-		ctx.status = 200;
-		ctx.body = {
-			code: 0,
-			message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
-		}
-	}
-
-
-
-
-	// //如果已经做了check并且已经保存到最新的一期,就不做后面的操作了
-	// if (isCheckAndSave) {
-	// 	return;
+	// if (dataNo === 0) {
+	// 	ctx.status = 200;
+	// 	ctx.body = {
+	// 		code: -1,
+	// 		message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
+	// 	}
+	// } else {
+	// 	ctx.status = 200;
+	// 	ctx.body = {
+	// 		code: 0,
+	// 		message: '已自动同步上期未完成任务 ' + dataNo + ' 条'
+	// 	}
 	// }
-	//
-	//
-	// var saveUnfinishTask = [];
-	// for (var x = 0, xSize = preData.length; x < xSize; x++) {
-	// 	saveUnfinishTask.push({
-	// 		name: preData[x].name,
-	// 		user: preData[x].user,
-	// 		project: preData[x].project,
-	// 		progress: preData[x].progress,
-	// 		status: preData[x].status,
-	// 		remark: preData[x].remark,
-	// 		period: nowWeekOfYear,
-	// 		create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
-	// 		update_at: moment().format("YYYY-MM-DD HH:mm:ss"),
-	// 	});
-	// }
-	// console.log('saveUnfinishTask ', saveUnfinishTask);
-	//
-	// var saveUnfinishArr = await TaskHelper.saveUnfinishTask(saveUnfinishTask);
-	// console.log('saveUnfinishArr ', saveUnfinishArr);
-	// if (saveUnfinishArr && saveUnfinishArr.length > 0) {
-	// 	isInsertData = true;
-	//
-	// }
+};
 
-}
-
+/**
+ * 通过period获取任务列表
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
 exports.getTaskListByPeriod = async(ctx, next) => {
 	var period = xss(ctx.request.body.period);
 	var userId = xss(ctx.request.body.userid);
@@ -177,11 +144,13 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 		data: projects,
 		message: '获取成功'
 	}
-}
+};
+
 /**
- * 编辑task
- * @param ctx
- * @param next
+ * 编辑任务
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
  */
 exports.updateTaskById = async(ctx, next) => {
 	var id = xss(ctx.request.body.id);
@@ -201,6 +170,7 @@ exports.updateTaskById = async(ctx, next) => {
 		update_at: moment().format("YYYY-MM-DD HH:mm:ss")
 	};
 
+	// 检查此任务是否为自己的任务,为了防止role=2的小组长篡改
 	var taskById = await TaskHelper.findTaskById(id);
 	if (taskById[0].user.toString() !== userId) {
 		ctx.status = 500;
@@ -211,6 +181,7 @@ exports.updateTaskById = async(ctx, next) => {
 		return;
 	}
 
+	// 不能更改之前的历史周报
 	if (taskById[0].period.toString() !== moment().format('w')) {
 		ctx.status = 500;
 		ctx.body = {
@@ -221,7 +192,6 @@ exports.updateTaskById = async(ctx, next) => {
 	}
 
 	var data = await TaskHelper.editTask(params);
-	// console.log('edit done  => ', data);
 	if (data) {
 		ctx.status = 200;
 		ctx.body = {
@@ -239,14 +209,16 @@ exports.updateTaskById = async(ctx, next) => {
 }
 
 /**
- * 删除task
- * @param ctx
- * @param next
+ * 删除任务
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
  */
 exports.delTask = async(ctx, next) => {
 	var id = xss(ctx.request.body.id);
 	var userId = xss(ctx.request.body.user_id);
 
+	// 不可以删除别人的任务,此项检查主要是防止小组长篡改
 	var taskById = await TaskHelper.findTaskById(id);
 	if (taskById[0].user.toString() !== userId) {
 		ctx.status = 500;
@@ -257,6 +229,7 @@ exports.delTask = async(ctx, next) => {
 		return;
 	}
 
+	// 历史记录不可以删除
 	if (taskById[0].period.toString() !== moment().format('w')) {
 		ctx.status = 500;
 		ctx.body = {
@@ -283,6 +256,12 @@ exports.delTask = async(ctx, next) => {
 	}
 }
 
+/**
+ * 排序获取的task列表
+ * @param objArr
+ * @param field
+ * @returns {Query|Array.<T>|*|Aggregate}
+ */
 function sortByPid(objArr, field) {
 
 	// 指定排序的比较函数
@@ -297,8 +276,13 @@ function sortByPid(objArr, field) {
 	return objArr.sort(compare(field));
 }
 
+/**
+ * 从task表读出,封装成前端和excel需要的task列表
+ * @param data
+ * @returns {Array}
+ */
 function renderProjects (data) {
-	// 重新组装结构,使其能为前端服务
+	// 重新组装结构,使其能为前端和excel服务
 	var projects = [];
 	var tempObj = {};
 	var statusZh = {
@@ -325,8 +309,6 @@ function renderProjects (data) {
 		var mItem = data[m];
 		for (var n = 0, nSize = projects.length; n < nSize; n++) {
 			var nItem = projects[n];
-			// console.log('mItem ', mItem);
-			// console.log('nItem ', nItem);
 			if (mItem.project.name === nItem.project) {
 				nItem.data.push({
 					id: mItem._id,
@@ -360,11 +342,10 @@ function renderProjects (data) {
 exports.exportWeeklyReport = async (ctx, next) => {
 
 	var period = xss(ctx.request.body.period);
-
 	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period});
 	var data = renderProjects(preData);
 	var fileName = await xlsx.exportExcel(data, period);
-	console.log('callback excel ', fileName);
+	// console.log('callback excel ', fileName);
 	if(fileName) {
 		ctx.status = 200;
 		ctx.body = {
@@ -381,4 +362,4 @@ exports.exportWeeklyReport = async (ctx, next) => {
 			message: '导出文件拉取失败'
 		}
 	}
-}
+};

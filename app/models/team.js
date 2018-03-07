@@ -17,19 +17,6 @@ var TeamSchema = new Schema({
 	// updated_at: Date
 },{collection:'team'});
 
-// Defines a pre hook for the document.
-// UserSchema.pre('save', function (next) {
-// 	var currentDate = new Date();
-// 	this.updated_at = currentDate;
-//
-// 	if(!this.create_at) {
-// 		this.create_at = currentDate;
-// 	}
-//
-// 	next();
-// });
-
-
 /**
  * 定义模型Team
  * 模型用来实现我们定义的模式，调用mongoose.model来编译Schema得到Model
@@ -39,7 +26,3 @@ var TeamSchema = new Schema({
 var Team = mongoose.model('Team', TeamSchema);
 
 module.exports = Team;
-
-/**
- * nodejs中文社区这篇帖子对mongoose的用法总结的不错：https://cnodejs.org/topic/548e54d157fd3ae46b233502
- */

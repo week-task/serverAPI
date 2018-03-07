@@ -1,8 +1,12 @@
-'use strict'
+/**
+ * 任务表数据库CRUD
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ */
+'use strict';
 
-var mongoose =  require('mongoose')
-var Task = mongoose.model('Task')
-var User = mongoose.model('User')
+var mongoose =  require('mongoose');
+var Task = mongoose.model('Task');
+var User = mongoose.model('User');
 
 /**
  * 查找所有task
@@ -17,9 +21,10 @@ const findAllTasks = async () => {
 		} else {
 			res = tasks;
 		}
-	})
-	return res
-}
+	});
+	return res;
+};
+
 /**
  * 根据ID查找task
  * @return {[type]} [description]
@@ -28,20 +33,6 @@ const findTaskById = async (id) => {
 	var query = Task.find({_id: id});
 	var res = [];
 	await query.exec(function(err, tasks) {
-		// console.log('tasks:=> ',tasks);
-		if (err) {
-			res = [];
-		} else {
-			res = tasks;
-		}
-	})
-	return res
-}
-
-const isCheckAndSave = async (params) => {
-	var query = Task.find({name: params.name, period: params.period, user: params.userId});
-	var res = [];
-	await query.exec((err, tasks) => {
 		if (err) {
 			res = [];
 		} else {
@@ -49,8 +40,13 @@ const isCheckAndSave = async (params) => {
 		}
 	});
 	return res;
-}
+};
 
+/**
+ * 通过period,status,user查询上一期未完成的任务
+ * @param params
+ * @returns {Array}
+ */
 const checkUnfinishTask = async (params) => {
 	var query = Task.find({period: parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId});
 	var res = [];
@@ -62,21 +58,13 @@ const checkUnfinishTask = async (params) => {
 		}
 	});
 	return res;
-}
+};
 
-const saveUnfinishTask = async (params) => {
-	var query = Task.save(params);
-	var res = [];
-	await query.exec(function(err, tasks) {
-		if (err) {
-			res = [];
-		} else {
-			res = tasks;
-		}
-	});
-	return res;
-}
-
+/**
+ * 通过period,status,user查询本期已经存在的未完成任务
+ * @param params
+ * @returns {Array}
+ */
 const isExistTask = async (params) => {
 	var query = Task.find({name: params.name, period: params.period, user: params.userId});
 	var res = [];
@@ -88,15 +76,16 @@ const isExistTask = async (params) => {
 		}
 	});
 	return res;
-}
+};
 
 /**
- * 查找相关task
+ * 查找相关task,根据用户的角色不一样进行对应的查找
  * @return {[type]} [description]
  */
 const findTaskByPeriod = async (params) => {
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
 
+	//role===0 是管理员的情况,直接传入period即可
 	if (uRole === 0) {
 		query = Task.find({"period": params.period});
 		await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
@@ -107,18 +96,20 @@ const findTaskByPeriod = async (params) => {
 			}
 		})
 	} else {
-		// query = Task.find({"period": params.period});
-		if (uRole === 1) {
+		if (uRole === 1) { //如果是小组长,就通过parent来查找
 			query = User.find({"parent": params.userId});
-		} else {
+		} else { //如果是本人,就匹配名字
 			query = User.find({"name": params.userName});
 		}
+		// 查出用户数组,方便查询相关任务
 		await query.exec((err, users) => {
 			if (err) { res = []; }
 			else {
 				ausers = users;
 			}
 		});
+		//根据用户数组,可以分用户角色查询出不同的task列表,如果是小组长,查询出来的是他本人和他下面的组员所有信息
+		//如果是本人,就$in里面只有自己的信息,查询出来自己的相关列表
 		queryInner = Task.find({user:{$in:ausers}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
 			if (err2) {res = []}
@@ -127,24 +118,6 @@ const findTaskByPeriod = async (params) => {
 			}
 		});
 	}
-	// else if (uRole === 2) {
-	//
-	// 	query = User.find({"name": params.userName});
-	// 	await query.exec((err, users) => {
-	// 		if (err) { res = []; }
-	// 		else {
-	// 			ausers = users;
-	// 		}
-	// 	});
-	// 	queryInner = Task.find({user:{$in:ausers}, period: params.period});
-	// 	await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
-	// 		console.log('query Tasks: ', tasks);
-	// 		if (err2) {res = []}
-	// 		else {
-	// 			res = tasks;
-	// 		}
-	// 	});
-	// }
 	return res;
 };
 
@@ -154,16 +127,8 @@ const findTaskByPeriod = async (params) => {
  * @return {[type]}      [description]
  */
 const addTask = async (task) => {
-	var task = await task.save();
-	return task
-};
-/**
- * 增加task
- * @param  {[Task]} task [mongoose.model('Task')]
- * @return {[type]}      [description]
- */
-const addMultiTask = async (task) => {
-
+	task = await task.save();
+	return task;
 };
 
 /**
@@ -182,7 +147,6 @@ const editTask = async (params) => {
 	});
 	var res = [];
 	await query.exec((err, task) => {
-		// console.log(err + ' ===== ' + task);
 		if (err) {
 			res = [];
 		} else {
@@ -201,7 +165,6 @@ const delTask = async (id) => {
 	var query = Task.remove({_id: id});
 	var res = undefined;
 	await query.exec((err, task) => {
-		// console.log(err + ' ===== ' + task);
 		if (err) {
 			res = err;
 		} else {
@@ -214,13 +177,10 @@ const delTask = async (id) => {
 
 module.exports = {
 	findAllTasks,
-	addMultiTask,
 	findTaskById,
 	findTaskByPeriod,
 	isExistTask,
-	isCheckAndSave,
 	checkUnfinishTask,
-	saveUnfinishTask,
 	addTask,
 	editTask,
 	delTask

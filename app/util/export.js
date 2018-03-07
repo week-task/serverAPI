@@ -1,5 +1,7 @@
 /**
- * Created by luolinjia on 2018/3/6.
+ * 周报导出(better-xlsx)
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ * @Date 2018-03-06
  */
 const fs = require('fs');
 const xlsx = require('better-xlsx');
@@ -61,14 +63,17 @@ function exportXlsx (data, period) {
 	col5.width = 20;
 
 	return new Promise((resolve, reject) => {
+
+		const excelPath = 'dist/spa-mat/statics/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx';
+
 		file
 			.saveAs()
-			.pipe(fs.createWriteStream('www/exportFile/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx'))
+			.pipe(fs.createWriteStream('www/' + excelPath))
 			.on('err', (err) => {
 				reject(err);
 			})
 			.on('finish', () => {
-				resolve('exportFile/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx');
+				resolve(excelPath);
 			})
 	});
 }

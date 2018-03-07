@@ -1,7 +1,11 @@
-'use strict'
+/**
+ * 项目表数据库CRUD
+ * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ */
+'use strict';
 
-var mongoose =  require('mongoose')
-var Project = mongoose.model('Project')
+var mongoose =  require('mongoose');
+var Project = mongoose.model('Project');
 
 /**
  * 查找所有项目
@@ -11,13 +15,12 @@ const findAllProjects = async () => {
 	var query = Project.find({});
 	var res = [];
 	await query.exec(function(err, projects) {
-		// console.log('projects:=> ',projects);
 		if (err) {
 			res = [];
 		} else {
 			res = projects;
 		}
-	})
+	});
 	return res
 }
 
@@ -34,7 +37,7 @@ const findProject = async (name) => {
 		}else {
 			res = project
 		}
-	})
+	});
 	return res;
 };
 
@@ -46,7 +49,6 @@ const findProject = async (name) => {
 const addProject = async (project) => {
 	var res = {code: 0};
 	await project.save().then((res) => {}).catch((err) => {
-		console.log('save err ', err);
 		res = err;
 	});
 	return res;

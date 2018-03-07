@@ -42,7 +42,3 @@ var ProjectSchema = new Schema({
 var Project = mongoose.model('Project', ProjectSchema);
 
 module.exports = Project;
-
-/**
- * nodejs中文社区这篇帖子对mongoose的用法总结的不错：https://cnodejs.org/topic/548e54d157fd3ae46b233502
- */
