@@ -11,7 +11,7 @@ var Schema = mongoose.Schema;
  * @type {mongoose}
  */
 var TeamSchema = new Schema({
-	leader_id: Number,
+	leader: String, // role = -1,0,1,2
 	name: String
 	// create_at: Date,
 	// updated_at: Date

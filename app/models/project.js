@@ -15,7 +15,8 @@ var ProjectSchema = new Schema({
 	name: {
 		unique: true,
 		type: String
-	}
+	},
+	team: String
 	// create_at: Date,
 	// updated_at: Date
 },{collection:'project'});
