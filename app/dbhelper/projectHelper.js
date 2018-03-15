@@ -11,8 +11,13 @@ var Project = mongoose.model('Project');
  * 查找所有项目
  * @return {[type]} [description]
  */
-const findAllProjects = async () => {
-	var query = Project.find({});
+const findAllProjects = async (params) => {
+	var query;
+	if (params.team) {
+		query = Project.find({'team':params.team}).populate('team');
+	} else {
+		query = Project.find({}).populate('team').populate('leader');
+	}
 	var res = [];
 	await query.exec(function(err, projects) {
 		if (err) {

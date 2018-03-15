@@ -16,7 +16,7 @@ var ProjectSchema = new Schema({
 		unique: true,
 		type: String
 	},
-	team: String
+	team: {type: Schema.Types.ObjectId, ref: 'Team'}
 	// create_at: Date,
 	// updated_at: Date
 },{collection:'project'});

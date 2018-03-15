@@ -12,7 +12,8 @@ module.exports = function () {
 	router.post('/user/add', User.addUser);
 	router.post('/login', User.login);
 
-	router.get('/getProjectList', Project.getProjectList);
+	router.post('/getProjectListByTeam', Project.getProjectOptions);
+	router.get('/getProjectList', Project.getProjectList);	
 	router.post('/project/add', Project.addProject);
 	router.post('/task/add', Task.addTask);
 	router.post('/task/edit', Task.updateTaskById);
