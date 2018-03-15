@@ -77,7 +77,7 @@ const secret = require('./config/index').secret;
 
 app.use(errorHandle);
 // 加入koa-jwt token机制
-app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/, /\//]}));
+app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/]}));
 app.use(logger());
 app.use(session(app));
 app.use(require('koa-static')(__dirname + '/www/dist/spa-mat'));

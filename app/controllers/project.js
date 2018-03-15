@@ -32,9 +32,11 @@ exports.getProjectList = async(ctx, next) => {
  */
 exports.addProject = async(ctx, next) => {
 	var projectName = xss(ctx.request.body.name);
+	var projectTeam = xss(ctx.request.body.team);
 	var project = new Project({
 		_id: new mongoose.Types.ObjectId(),
-		name: projectName
+		name: projectName,
+		team: projectTeam
 	});
 	var res = await projectHelper.addProject(project);
 	if (res.code === 11000) {

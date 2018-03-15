@@ -45,6 +45,7 @@ exports.login = async(ctx, next) => {
 			parent_id: user.parent,
 			name: user.name,
 			role: user.role,
+			team: user.team,
 			project: user.project
 		};
 		ctx.status = 200;

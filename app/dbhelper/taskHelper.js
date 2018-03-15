@@ -85,16 +85,33 @@ const isExistTask = async (params) => {
 const findTaskByPeriod = async (params) => {
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
 
-	//role===0 是管理员的情况,直接传入period即可
-	if (uRole === 0) {
-		query = Task.find({"period": params.period});
-		await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
-			if(err) {
-				res = [];
-			}else {
+	// role = -1是super管理员的情况, 应该不会进入这种情况
+	if (uRole === -1) {
+		// query = Task.find({"period": params.period});
+		// await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
+		// 	if(err) {
+		// 		res = [];
+		// 	} else {
+		// 		res = tasks;
+		// 	}
+		// });
+	} else if (uRole === 0) {//role = 0 是team管理员的情况,根据team
+		query = User.find({"team": params.team_id});
+		// 查出用户数组,方便查询相关任务
+		await query.exec((err, users) => {
+			if (err) { res = []; }
+			else {
+				ausers = users;
+			}
+		});
+
+		queryInner = Task.find({user:{$in:ausers}, period: params.period});
+		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
+			if (err2) {res = []}
+			else {
 				res = tasks;
 			}
-		})
+		});
 	} else {
 		if (uRole === 1) { //如果是小组长,就通过parent来查找
 			query = User.find({"parent": params.userId});
