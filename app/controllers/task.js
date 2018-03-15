@@ -130,12 +130,14 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 	var userId = xss(ctx.request.body.userid);
 	var userName = xss(ctx.request.body.username);
 	var userRole = xss(ctx.request.body.userrole);
+	var team = xss(ctx.request.body.team);
 
 	var params = {
 		period: period,
 		userId: userId,
 		userName: userName,
-		userRole: userRole
+		userRole: userRole,
+		team: team
 	};
 	var data = await TaskHelper.findTaskByPeriod(params);
 	var projects = renderProjects(data);

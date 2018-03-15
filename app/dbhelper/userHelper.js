@@ -47,8 +47,16 @@ const findUser = async (name) => {
  * @return {[type]}      [description]
  */
 const addUser = async (user) => {
-	user = await user.save();
-	return user
+	// user = await user.save();
+	// return user
+
+	var res = {code: 0};
+	await user.save().then((res) => {
+		res = user;
+	}).catch((err) => {
+		res = err;
+	});
+	return res;
 };
 
 

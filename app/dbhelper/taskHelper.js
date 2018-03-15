@@ -85,18 +85,10 @@ const isExistTask = async (params) => {
 const findTaskByPeriod = async (params) => {
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
 
-	// role = -1是super管理员的情况, 应该不会进入这种情况
-	if (uRole === -1) {
-		// query = Task.find({"period": params.period});
-		// await query.populate('user', 'name').populate('project').exec(function(err, tasks) {
-		// 	if(err) {
-		// 		res = [];
-		// 	} else {
-		// 		res = tasks;
-		// 	}
-		// });
-	} else if (uRole === 0) {//role = 0 是team管理员的情况,根据team
-		query = User.find({"team": params.team_id});
+	// role = -1是super管理员的情况, 根据不同的具体情况做定论，因为为-1的角色，不会直接展示所有的task，必然是根据不同的team和团队来进行展示的，也就是会传入不同的team，那-1这种情况就不必再重复
+	// if (uRole === -1) {} else 
+	if (uRole === 0) {//role = 0 是team管理员的情况,根据team
+		query = User.find({"team": params.team});
 		// 查出用户数组,方便查询相关任务
 		await query.exec((err, users) => {
 			if (err) { res = []; }

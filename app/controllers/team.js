@@ -1,13 +1,16 @@
 /**
- * 项目表接口controller
+ * TEAM表接口controller
  * @author karl.luo<luolinjia@cmiot.chinamobile.com>
  */
 'use strict';
 
 var xss = require('xss');
 var mongoose = require('mongoose');
-var Project = mongoose.model('Project');
-import projectHelper from '../dbhelper/projectHelper';
+var bcrypt = require('bcryptjs');
+var Team = mongoose.model('Team');
+var User = mongoose.model('User');
+import teamHelper from '../dbhelper/teamHelper';
+import userHelper from '../dbhelper/userHelper';
 
 /**
  * 获取该team项目列表
@@ -15,52 +18,64 @@ import projectHelper from '../dbhelper/projectHelper';
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-exports.getProjectOptions = async(ctx, next) => {
-	console.log('coming')
-	var team = xss(ctx.request.body.team);
-	var data = await projectHelper.findAllProjects({team: team});
+exports.getTeamList = async(ctx, next) => {
+	var data = await teamHelper.findAllTeams();
 	if(data && data.length > 0) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
 			data: data,
 			message: '获取成功'
-		}
-	}
-};
-
-/**
- * 获取项目列表
- * @param  {[type]}   ctx  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-exports.getProjectList = async(ctx, next) => {
-	var data = await projectHelper.findAllProjects({});
-	ctx.status = 200;
-	ctx.body = {
-		code: 0,
-		data: renderProjectsByTeams(data),
-		message: '获取成功'
+		};
+	} else {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: [],
+			message: '没有数据'
+		};
 	}
 };
 
 
 /**
- * 新增项目
+ * 新增team
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-exports.addProject = async(ctx, next) => {
-	var projectName = xss(ctx.request.body.name);
-	var projectTeam = xss(ctx.request.body.team);
-	var project = new Project({
+exports.addTeam = async(ctx, next) => {
+	var teamName = xss(ctx.request.body.name);
+	// 创建leader用户
+	var userName = xss(ctx.request.body.username);
+	var parent = xss(ctx.request.body.parent);
+	// 对密码进行加密
+	var salt = bcrypt.genSaltSync(10);
+	var hashPassword = bcrypt.hashSync(111, salt);
+
+	var leader = new User({
 		_id: new mongoose.Types.ObjectId(),
-		name: projectName,
-		team: projectTeam
+		name: userName,
+		password: hashPassword,
+		role: 0,
+		parent: parent
 	});
-	var res = await projectHelper.addProject(project);
+	var user = await userHelper.addUser(leader);
+
+	if (user.code === 11000) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			message: '真笨,已经有这么个人了'
+		};
+		return;
+	}
+
+	var team = new Team({
+		name: projectName,
+		leader: username
+	});
+	var res = await teamHelper.addProject(project);
 	if (res.code === 11000) {
 		ctx.status = 500;
 		ctx.body = {
@@ -80,7 +95,7 @@ exports.addProject = async(ctx, next) => {
 };
 
 /**
- * 排序获取的project列表
+ * 排序获取的task列表
  * @param objArr
  * @param field
  * @returns {Query|Array.<T>|*|Aggregate}

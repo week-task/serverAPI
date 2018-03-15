@@ -11,6 +11,7 @@
   "dependencies": {
     "babel-preset-env": "^1.4.0",
     "babel-register": "^6.24.1",
+    "bcryptjs": "^2.4.3",
     "better-xlsx": "^0.4.0",
     "bluebird": "^3.5.0",
     "cloudinary": "^1.8.0",
