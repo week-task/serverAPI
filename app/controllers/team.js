@@ -19,6 +19,7 @@ import userHelper from '../dbhelper/userHelper';
  * @return {[type]}        [description]
  */
 exports.getTeamList = async(ctx, next) => {
+	// TODO 需要传入用户role参数，非-1的角色不可以查询
 	var data = await teamHelper.findAllTeams();
 	if(data && data.length > 0) {
 		ctx.status = 200;
@@ -95,7 +96,7 @@ exports.addTeam = async(ctx, next) => {
 };
 
 /**
- * 排序获取的task列表
+ * 排序获取的team列表
  * @param objArr
  * @param field
  * @returns {Query|Array.<T>|*|Aggregate}

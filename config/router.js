@@ -1,9 +1,10 @@
 'use strict'
 
-const Router = require('koa-router')
-const User = require('../app/controllers/user')
-const Project = require('../app/controllers/project')
-const Task = require('../app/controllers/task')
+const Router = require('koa-router');
+const User = require('../app/controllers/user');
+const Project = require('../app/controllers/project');
+const Task = require('../app/controllers/task');
+const Team = require('../app/controllers/team');
 
 module.exports = function () {
 	var router = new Router({
@@ -21,6 +22,9 @@ module.exports = function () {
 	router.post('/isFinished', Task.checkUnfinishTask);
 	router.post('/getTaskListByPeriod', Task.getTaskListByPeriod);
 	router.post('/export', Task.exportWeeklyReport);
+
+	// team 接口
+	router.get('/getTeamList', Team.getTeamList);
 
 	return router
 }

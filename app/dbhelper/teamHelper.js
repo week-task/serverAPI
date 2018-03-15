@@ -12,7 +12,7 @@ var Team = mongoose.model('Team');
  * @return {[type]} [description]
  */
 const findAllTeams = async () => {
-	var query = Team.find({});
+	var query = Team.find({}).populate('leader');
 	var res = [];
 	await query.exec(function(err, teams) {
 		if (err) {
