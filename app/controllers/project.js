@@ -105,7 +105,7 @@ function sortByPid(objArr, field) {
  * @returns {Array}
  */
 function renderProjectsByTeams (data) {
-	
+	// 目标结构
 	var dataMock = [{
 		team: '**团队',
 		selected: [],
