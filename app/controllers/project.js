@@ -19,7 +19,6 @@ exports.getProjectOptions = async(ctx, next) => {
 	console.log('coming')
 	var team = xss(ctx.request.body.team);
 	var data = await projectHelper.findAllProjects({team: team});
-	console.log(data);
 	if(data && data.length > 0) {
 		ctx.status = 200;
 		ctx.body = {
@@ -41,7 +40,7 @@ exports.getProjectList = async(ctx, next) => {
 	ctx.status = 200;
 	ctx.body = {
 		code: 0,
-		data: data,
+		data: renderProjectsByTeams(data),
 		message: '获取成功'
 	}
 };
@@ -105,51 +104,52 @@ function sortByPid(objArr, field) {
  * @param data
  * @returns {Array}
  */
-function renderProjects (data) {
+function renderProjectsByTeams (data) {
 	
+	var dataMock = [{
+		team: '**团队',
+		selected: [],
+		data: [
+			{id: 1, name: '项目1'},
+			{id: 2, name: '项目2'},
+			{id: 3, name: '项目3'}
+		]
+	}];
 	
 	// 重新组装结构,使其能为前端服务
-	var projects = [];
+	var teams = [];
 	var tempObj = {};
 
-	// get the relevant projects
+	// get the relevant teams
 	for (var i = 0, size = data.length; i < size; i++) {
-		if (!tempObj[data[i].project.name]) {
+		if (!tempObj[data[i].team.name]) {
 			var item = {
-				pid: data[i].project._id,
-				project: data[i].project.name,
+				tid: data[i].team._id,
+				team: data[i].team.name, // TODO 这里可以加入leader的信息，好在前台展示
 				selected: [],
 				data: []
 			};
-			projects.push(item);
-			tempObj[data[i].project.name] = 1;
+			teams.push(item);
+			tempObj[data[i].team.name] = 1;
 		}
 	}
+
 	// 组装成前端需要的数据结构
 	for (var m = 0, mSize = data.length; m < mSize; m++) {
 		var mItem = data[m];
-		for (var n = 0, nSize = projects.length; n < nSize; n++) {
-			var nItem = projects[n];
-			if (mItem.project.name === nItem.project) {
+		for (var n = 0, nSize = teams.length; n < nSize; n++) {
+			var nItem = teams[n];
+			if (mItem.team.name === nItem.team) {
 				nItem.data.push({
 					id: mItem._id,
-					name: mItem.name,
-					user: mItem.user,
-					username: mItem.user.name,
-					project: mItem.project,
-					progress: mItem.progress,
-					progressPercent: mItem.progress + '%',
-					status: mItem.status,
-					remark: mItem.remark,
-					period: mItem.period,
-					create_at: mItem.create_at,
-					update_at: mItem.update_at
+					tid: nItem.tid, 
+					name: mItem.name 
 				});
 			}
 		}
 	}
 
-	sortByPid(projects, 'pid');
+	sortByPid(teams, 'tid');
 
-	return projects;
+	return teams;
 }

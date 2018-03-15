@@ -16,7 +16,8 @@ const findAllProjects = async (params) => {
 	if (params.team) {
 		query = Project.find({'team':params.team}).populate('team');
 	} else {
-		query = Project.find({}).populate('team').populate('leader');
+		// TODO 需要把查询出来的team对象里面的leader属性关联user表进行查询，得到username
+		query = Project.find({}).populate('team');
 	}
 	var res = [];
 	await query.exec(function(err, projects) {
