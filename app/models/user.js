@@ -20,7 +20,8 @@ var UserSchema = new Schema({
 	role: Number,
 	parent: String,
 	project: String,
-	team: String
+	team: String,
+	status: Number // 这个状态可以定义这个人是否还在职：0代表正常状态，1代表离职
 	// create_at: Date,
 	// updated_at: Date
 },{collection:'user'});

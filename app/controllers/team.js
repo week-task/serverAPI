@@ -38,6 +38,48 @@ exports.getTeamList = async(ctx, next) => {
 	}
 };
 
+/**
+ * 新增team leader
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.addTeamLeader = async(ctx, next) => {
+	// 创建leader用户
+	var userName = xss(ctx.request.body.name);
+	var self = xss(ctx.request.body.self);
+	// 对密码进行加密
+	var salt = bcrypt.genSaltSync(10);
+	var hashPassword = bcrypt.hashSync('admin', salt);
+
+	var leader = new User({
+		_id: new mongoose.Types.ObjectId(),
+		name: userName,
+		password: hashPassword,
+		role: 0,
+		status: 0,
+		parent: self
+	});
+	var user = await userHelper.addUser(leader);
+
+	if (user.code === 11000) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			message: '真笨,已经有这么个人了'
+		};
+		return;
+	}
+	if (res.code === 0) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: [],
+			message: '新增团队leader成功'
+		}
+	}
+};
+
 
 /**
  * 新增team
@@ -48,18 +90,19 @@ exports.getTeamList = async(ctx, next) => {
 exports.addTeam = async(ctx, next) => {
 	var teamName = xss(ctx.request.body.name);
 	// 创建leader用户
-	var userName = xss(ctx.request.body.username);
-	var parent = xss(ctx.request.body.parent);
+	var userName = xss(ctx.request.body.userName);
+	var self = xss(ctx.request.body.self);
 	// 对密码进行加密
 	var salt = bcrypt.genSaltSync(10);
-	var hashPassword = bcrypt.hashSync(111, salt);
+	var hashPassword = bcrypt.hashSync('admin', salt);
 
 	var leader = new User({
 		_id: new mongoose.Types.ObjectId(),
 		name: userName,
 		password: hashPassword,
 		role: 0,
-		parent: parent
+		status: 0,
+		parent: self
 	});
 	var user = await userHelper.addUser(leader);
 
@@ -73,15 +116,15 @@ exports.addTeam = async(ctx, next) => {
 	}
 
 	var team = new Team({
-		name: projectName,
-		leader: username
+		name: teamName,
+		leader: user._id
 	});
-	var res = await teamHelper.addProject(project);
+	var res = await teamHelper.addTeam(team);
 	if (res.code === 11000) {
 		ctx.status = 500;
 		ctx.body = {
 			code: 0,
-			message: '真笨,这个项目名称早就有了'
+			message: '真笨,这个团队名称早就有了'
 		};
 		return;
 	}
@@ -90,7 +133,7 @@ exports.addTeam = async(ctx, next) => {
 		ctx.body = {
 			code: 0,
 			data: [],
-			message: '新增项目成功'
+			message: '新增团队成功'
 		}
 	}
 };

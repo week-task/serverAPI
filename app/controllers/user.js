@@ -6,6 +6,7 @@
 
 var xss = require('xss')
 var mongoose = require('mongoose')
+var bcrypt = require('bcryptjs')
 var User = mongoose.model('User')
 var jsonwebtoken = require('jsonwebtoken')
 import userHelper from '../dbhelper/userHelper'

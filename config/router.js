@@ -25,6 +25,8 @@ module.exports = function () {
 
 	// team 接口
 	router.get('/getTeamList', Team.getTeamList);
+	router.post('/team/add', Team.addTeam);
+	router.post('/team/addLeader', Team.addTeamLeader);
 
 	return router
 }
