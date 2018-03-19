@@ -17,6 +17,7 @@ var UserSchema = new Schema({
 		type: String
 	},
 	password: String,
+	salt: String,
 	role: Number,
 	parent: String,
 	project: String,

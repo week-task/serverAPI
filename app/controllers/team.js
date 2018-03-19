@@ -56,6 +56,7 @@ exports.addTeamLeader = async(ctx, next) => {
 		_id: new mongoose.Types.ObjectId(),
 		name: userName,
 		password: hashPassword,
+		salt: salt,
 		role: 0,
 		status: 0,
 		parent: self

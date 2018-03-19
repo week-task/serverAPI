@@ -32,14 +32,27 @@ exports.login = async(ctx, next) => {
 	}
 
 	var user = await userHelper.findUser(userName);
+	// console.log('user ',user);
+	// console.log('userteam ',user.team);
 	// console.log('user: ', user);
 	if(!user) {
 		ctx.status = 401;
 		ctx.body = {
 			code: -1,
 			message: '根本就没这个人'
-		}
-	} else if (user.password === password) {
+		};
+		return;
+	} 
+
+	
+
+	var salt = user.salt;
+	var hashPassword = bcrypt.hashSync(password, salt);
+	console.log('pass: ', hashPassword);
+	if (bcrypt.compareSync(password, hashPassword)) {
+		console.log(user);
+		console.log(user.team);
+
 		// username and password are correct
 		var userInfo = {
 			_id: user._id,
