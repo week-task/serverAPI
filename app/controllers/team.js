@@ -70,7 +70,7 @@ exports.addTeamLeader = async(ctx, next) => {
 		};
 		return;
 	}
-	if (res.code === 0) {
+	if (user.code === 0) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
@@ -79,7 +79,6 @@ exports.addTeamLeader = async(ctx, next) => {
 		}
 	}
 };
-
 
 /**
  * 新增team
@@ -92,29 +91,6 @@ exports.addTeam = async(ctx, next) => {
 	// 创建leader用户
 	var userName = xss(ctx.request.body.userName);
 	var self = xss(ctx.request.body.self);
-	// 对密码进行加密
-	var salt = bcrypt.genSaltSync(10);
-	var hashPassword = bcrypt.hashSync('admin', salt);
-
-	var leader = new User({
-		_id: new mongoose.Types.ObjectId(),
-		name: userName,
-		password: hashPassword,
-		role: 0,
-		status: 0,
-		parent: self
-	});
-	var user = await userHelper.addUser(leader);
-
-	if (user.code === 11000) {
-		ctx.status = 500;
-		ctx.body = {
-			code: 0,
-			message: '真笨,已经有这么个人了'
-		};
-		return;
-	}
-
 	var team = new Team({
 		name: teamName,
 		leader: user._id
