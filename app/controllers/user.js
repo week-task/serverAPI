@@ -32,8 +32,6 @@ exports.login = async(ctx, next) => {
 	}
 
 	var user = await userHelper.findUser(userName);
-	console.log('user ',user);
-	// console.log('user: ', user);
 	if(!user) {
 		ctx.status = 401;
 		ctx.body = {
@@ -48,24 +46,18 @@ exports.login = async(ctx, next) => {
 		var prevSalt = bcrypt.genSaltSync(10);
 		var prevPassword = bcrypt.hashSync('111', prevSalt);
 		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
-		console.log('user add salt => ',user);
 	}
 
 	var salt = user.salt;
 	var hashPassword = bcrypt.hashSync(password, salt);
-	console.log('pass: ', hashPassword);
 	if (bcrypt.compareSync(password, hashPassword)) {
-		console.log(user);
-		console.log(user.team);
-
 		// username and password are correct
 		var userInfo = {
 			_id: user._id,
 			parent_id: user.parent,
 			name: user.name,
 			role: user.role,
-			team: user.team,
-			project: user.project
+			team: user.team
 		};
 		ctx.status = 200;
 		ctx.body = {
@@ -74,7 +66,7 @@ exports.login = async(ctx, next) => {
 				user: userInfo,
 				token: jsonwebtoken.sign({
 					data: userInfo,
-					exp: Math.floor(Date.now() / 1000) + (60 * 30) // 60 seconds * 30 minutes = 0.5 hour
+					exp: Math.floor(Date.now() / 1000) + (60 * 60 * 3) // 60 seconds * 60 minutes * 3 = 3 hour
 				}, secret)
 			},
 			message: '登录成功!'
