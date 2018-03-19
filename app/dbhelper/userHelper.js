@@ -59,9 +59,29 @@ const addUser = async (user) => {
 	return res;
 };
 
+/**
+ * 修改上一版用户密码加salt
+ * @return {[type]} [description]
+ */
+const updatePrevPassword = async (params) => {
+	var query = User.update({name: params.user.name}, {$set:{'password': params.password, 'salt': params.salt}});
+	var res = null;
+	await query.exec(function(err, user) {
+		if(err) {
+			res = {}
+		}else {
+			res = user;
+		}
+	});
+
+	var user = await findUser(params.user.name);
+
+	return user;
+};
 
 module.exports = {
 	findAllUsers,
 	findUser,
-	addUser
+	addUser,
+	updatePrevPassword
 };

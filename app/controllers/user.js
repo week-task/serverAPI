@@ -32,8 +32,7 @@ exports.login = async(ctx, next) => {
 	}
 
 	var user = await userHelper.findUser(userName);
-	// console.log('user ',user);
-	// console.log('userteam ',user.team);
+	console.log('user ',user);
 	// console.log('user: ', user);
 	if(!user) {
 		ctx.status = 401;
@@ -44,7 +43,13 @@ exports.login = async(ctx, next) => {
 		return;
 	} 
 
-	
+	if (user.password === '111') {
+		// 如果用户的密码是111，说明是v1.0.0版本的用户，此时要用salt重新加一次密，并存入salt
+		var prevSalt = bcrypt.genSaltSync(10);
+		var prevPassword = bcrypt.hashSync('111', prevSalt);
+		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
+		console.log('user add salt => ',user);
+	}
 
 	var salt = user.salt;
 	var hashPassword = bcrypt.hashSync(password, salt);
