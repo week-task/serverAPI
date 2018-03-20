@@ -46,8 +46,8 @@ const findAllTeamLeaders = async () => {
  * 查找相关team
  * @return {[type]} [description]
  */
-const findTeam = async (name) => {
-	var query = Team.findOne({name});
+const findTeam = async (id) => {
+	var query = Team.findOne({_id:id}).populate('leader');
 	var res = null;
 	await query.exec(function(err, team) {
 		if(err) {
@@ -74,10 +74,50 @@ const addTeam = async (team) => {
 	return res;
 };
 
+/**
+ * 编辑task
+ * @param  {[Task]} task [mongoose.model('Task')]
+ * @return {[type]}      [description]
+ */
+const editTeam = async (params) => {
+
+	var prevTeam = await findTeam(params.teamId);
+
+	// unbind team和leader
+	var unbindQuery = User.update({_id: prevTeam.leader._id}, {$unset: {team:1}});
+	await unbindQuery.exec((err, user) => {
+		console.log('xx ', err);
+		console.log('xx ', user);
+		// if (err) {res=[];}
+		// else {res=team;}
+	});
+
+	var query = Team.findByIdAndUpdate(params.teamId, {
+		name:params.teamName,
+		leader:params.user
+	});
+	var res = [];
+	await query.exec((err, team) => {
+		if (err) {
+			res = [];
+		} else {
+			res = team;
+		}
+	});
+
+	// bind team和leader
+	var bindQuery = User.update({_id:params.user}, {$set: {team: params.teamId}});
+	await bindQuery.exec((err, user) => {
+		console.log('xx1 ', err);
+		console.log('xx1 ', user);
+	});
+	return res;
+};
 
 module.exports = {
 	findAllTeams,
 	findAllTeamLeaders,
 	findTeam,
-	addTeam
+	addTeam,
+	editTeam
 };

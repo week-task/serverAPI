@@ -27,6 +27,7 @@ module.exports = function () {
 	router.get('/getTeamList', Team.getTeamList);
 	router.get('/getTeamLeaderList', Team.getTeamLeaderList);
 	router.post('/team/add', Team.addTeam);
+	router.post('/team/edit', Team.editTeam);
 	router.post('/team/addLeader', Team.addTeamLeader);
 
 	return router

@@ -143,6 +143,28 @@ exports.addTeam = async(ctx, next) => {
 };
 
 /**
+ * 修改team
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.editTeam = async(ctx, next) => {
+	var teamId = xss(ctx.request.body.id);
+	var teamName = xss(ctx.request.body.name);
+	var user = xss(ctx.request.body.userName);
+
+	// // 修改team信息，如果只是修改teamName，那就只需要更新team一张表，如果修改了团队负责人，那么连同user表下的team也要一起更改，所以这里要进行预先判断
+	// var team = await teamHelper.findTeam(teamId);
+	// console.log('team: ', team);
+	// if (team.leader._id + '' === teamName) {
+
+	// }
+
+	var updateTeam = await teamHelper.editTeam({teamId: teamId, teamName: teamName, user: user});
+	console.log('updateTeam ', updateTeam);
+};
+
+/**
  * 排序获取的team列表
  * @param objArr
  * @param field
