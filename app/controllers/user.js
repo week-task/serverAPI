@@ -66,7 +66,7 @@ exports.login = async(ctx, next) => {
 				user: userInfo,
 				token: jsonwebtoken.sign({
 					data: userInfo,
-					exp: Math.floor(Date.now() / 1000) + (60 * 60 * 3) // 60 seconds * 60 minutes * 3 = 3 hour
+					exp: Math.floor(Date.now() / 1000) + (60 * 60 * 15) // 60 seconds * 60 minutes * 3 = 3 hour
 				}, secret)
 			},
 			message: '登录成功!'

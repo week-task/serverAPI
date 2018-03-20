@@ -39,6 +39,31 @@ exports.getTeamList = async(ctx, next) => {
 };
 
 /**
+ * 获取该team leader列表
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.getTeamLeaderList = async(ctx, next) => {
+	var data = await teamHelper.findAllTeamLeaders();
+	if(data && data.length > 0) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: data,
+			message: '获取成功'
+		};
+	} else {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: [],
+			message: '没有数据'
+		};
+	}
+};
+
+/**
  * 新增team leader
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]
@@ -90,11 +115,11 @@ exports.addTeamLeader = async(ctx, next) => {
 exports.addTeam = async(ctx, next) => {
 	var teamName = xss(ctx.request.body.name);
 	// 创建leader用户
-	var userName = xss(ctx.request.body.userName);
+	var user = xss(ctx.request.body.userName);
 	var self = xss(ctx.request.body.self);
 	var team = new Team({
 		name: teamName,
-		leader: user._id
+		leader: user
 	});
 	var res = await teamHelper.addTeam(team);
 	if (res.code === 11000) {
@@ -105,11 +130,13 @@ exports.addTeam = async(ctx, next) => {
 		};
 		return;
 	}
-	if (res.code === 0) {
+	if (res) {
+		// 创建成果后，应该更新对应的user及其team
+		var bindUser = await userHelper.bindTeam4User({user: user, team:res._id});
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			data: [],
+			data: res,
 			message: '新增团队成功'
 		}
 	}

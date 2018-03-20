@@ -6,6 +6,7 @@
 
 var mongoose =  require('mongoose');
 var Team = mongoose.model('Team');
+var User = mongoose.model('User');
 
 /**
  * 查找所有team
@@ -22,6 +23,23 @@ const findAllTeams = async () => {
 		}
 	});
 	return res
+}
+
+/**
+ * 查找所有team leader
+ * @return {[type]} [description]
+ */
+const findAllTeamLeaders = async () => {
+	var query = User.find({role: 0, team: undefined});
+	var res = [];
+	await query.exec(function(err, users) {
+		if (err) {
+			res = [];
+		} else {
+			res = users;
+		}
+	});
+	return res;
 }
 
 /**
@@ -48,7 +66,9 @@ const findTeam = async (name) => {
  */
 const addTeam = async (team) => {
 	var res = {code: 0};
-	await team.save().then((res) => {}).catch((err) => {
+	await team.save().then((re) => {
+		res = re;
+	}).catch((err) => {
 		res = err;
 	});
 	return res;
@@ -57,6 +77,7 @@ const addTeam = async (team) => {
 
 module.exports = {
 	findAllTeams,
+	findAllTeamLeaders,
 	findTeam,
 	addTeam
 };

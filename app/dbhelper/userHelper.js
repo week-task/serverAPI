@@ -79,9 +79,22 @@ const updatePrevPassword = async (params) => {
 	return user;
 };
 
+const bindTeam4User = async (params) => {
+	var query = User.update({_id: params.user}, {$set:{team: params.team}});
+	var res = null;
+	await query.exec((err, user) => {
+		if (err) {res = {};}
+		else {
+			res = user;
+		}
+	});
+	return res;
+};
+
 module.exports = {
 	findAllUsers,
 	findUser,
 	addUser,
+	bindTeam4User,
 	updatePrevPassword
 };
