@@ -162,6 +162,14 @@ exports.editTeam = async(ctx, next) => {
 
 	var updateTeam = await teamHelper.editTeam({teamId: teamId, teamName: teamName, user: user});
 	console.log('updateTeam ', updateTeam);
+	if (updateTeam) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: updateTeam,
+			message: '修改团队成功'
+		}
+	}
 };
 
 /**
