@@ -173,6 +173,38 @@ exports.editTeam = async(ctx, next) => {
 };
 
 /**
+ * 删除team
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.deleteTeam = async(ctx, next) => {
+	var teamId = xss(ctx.request.body.id);
+
+	// 这里的删除要做一些判断，如果team下面包含一些非角色为0用户，也包含一些project，就不可以被删除，如果team被删掉，那对应的管理员角色为0的用户，取消对该team的绑定
+	var res = await teamHelper.canIDelete(teamId);
+	if(!res) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			data: res,
+			message: '该团队下有相关的非管理员用户或存在关联的项目'
+		};
+	} else {
+
+		var delRes = await teamHelper.deleteTeam(teamId);
+		if (delRes) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: res,
+				message: '删除成功'
+			};
+		}
+	}
+}
+
+/**
  * 排序获取的team列表
  * @param objArr
  * @param field

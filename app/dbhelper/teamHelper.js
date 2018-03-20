@@ -7,6 +7,7 @@
 var mongoose =  require('mongoose');
 var Team = mongoose.model('Team');
 var User = mongoose.model('User');
+var Project = mongoose.model('Project');
 
 /**
  * 查找所有team
@@ -75,8 +76,8 @@ const addTeam = async (team) => {
 };
 
 /**
- * 编辑task
- * @param  {[Task]} task [mongoose.model('Task')]
+ * 编辑team
+ * @param  {[Team]} team [mongoose.model('Team')]
  * @return {[type]}      [description]
  */
 const editTeam = async (params) => {
@@ -114,10 +115,63 @@ const editTeam = async (params) => {
 	return res;
 };
 
+/**
+ * 判断能否删除team
+ * @param  {[Team]} team [mongoose.model('Team')]
+ * @return {[type]}      [description]
+ */
+const canIDelete = async (params) => {
+	var res = true;
+	var checkUserQuery = User.find({team: params, role:{$in:[1,2]}});
+	await checkUserQuery.exec((err, user) => {
+		if (err) {res = true;}
+		else {
+			if(user) { res = false; }
+		}
+	});
+	var checkProjectQuery = Project.find({team: params});
+	await checkProjectQuery.exec((err, project) => {
+		if (err) {res = true;}
+		else {
+			if(project) { res = false; }
+		}
+	});
+	return res;
+};
+
+/**
+ * 删除team
+ * @param  {[Team]} team [mongoose.model('Team')]
+ * @return {[type]}      [description]
+ */
+const deleteTeam = async (params) => {
+
+	// 先解绑该team的管理用户
+	var teamLeaderQuery = User.update({team: params}, {$unset:{team: 1}});
+	await teamLeaderQuery.exec((err, user) => {
+		console.log('[deleteTeam] err ', err);
+		console.log('[deleteTeam] user ', user);
+	});
+	// 再删除该team的相关信息
+	var query = Team.remove({_id: params});
+	var res = false;
+	await query.exec((err, team) => {
+		if (err) {
+			res = false;
+		} else {
+			res = true;
+		}
+	});
+	return res;
+};
+
+
 module.exports = {
 	findAllTeams,
 	findAllTeamLeaders,
 	findTeam,
 	addTeam,
-	editTeam
+	editTeam,
+	canIDelete,
+	deleteTeam
 };
