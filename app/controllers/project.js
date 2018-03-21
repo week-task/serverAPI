@@ -36,7 +36,8 @@ exports.getProjectOptions = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.getProjectList = async(ctx, next) => {
-	var data = await projectHelper.findAllProjects({});
+	var team = xss(ctx.request.body.team);
+	var data = await projectHelper.findAllProjects({team: team});
 	ctx.status = 200;
 	ctx.body = {
 		code: 0,

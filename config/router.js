@@ -32,7 +32,7 @@ module.exports = function () {
 
 	// project 接口
 	router.post('/getProjectListByTeam', Project.getProjectOptions);
-	router.get('/getProjectList', Project.getProjectList);	
+	router.post('/getProjectList', Project.getProjectList);	
 	router.post('/project/add', Project.addProject);
 	router.post('/project/edit', Project.editProject);
 	router.post('/project/delete', Project.deleteProject);
