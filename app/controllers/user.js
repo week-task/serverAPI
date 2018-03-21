@@ -41,12 +41,26 @@ exports.login = async(ctx, next) => {
 		return;
 	} 
 
+	if (user.status && user.status === 1) {
+		ctx.status = 401;
+		ctx.body = {
+			code: -1,
+			message: '此人已离职'
+		};
+		return;
+	}
+	
+	if (user.status === null || user.status === undefined) {
+		await userHelper.addStatus4User(user._id);
+	}
+
 	if (user.password === '111') {
 		// 如果用户的密码是111，说明是v1.0.0版本的用户，此时要用salt重新加一次密，并存入salt
 		var prevSalt = bcrypt.genSaltSync(10);
 		var prevPassword = bcrypt.hashSync('111', prevSalt);
 		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
 	}
+
 
 	var salt = user.salt;
 	var hashPassword = bcrypt.hashSync(password, salt);

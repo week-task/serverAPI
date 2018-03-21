@@ -58,7 +58,8 @@ exports.addProject = async(ctx, next) => {
 	var project = new Project({
 		_id: new mongoose.Types.ObjectId(),
 		name: projectName,
-		team: projectTeam
+		team: projectTeam,
+		status: 0
 	});
 	var res = await projectHelper.addProject(project);
 	if (res.code === 11000) {
@@ -77,6 +78,16 @@ exports.addProject = async(ctx, next) => {
 			message: '新增项目成功'
 		}
 	}
+};
+
+/**
+ * 编辑项目
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.editProject = async(ctx, next) => {
+
 };
 
 /**

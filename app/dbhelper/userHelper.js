@@ -91,10 +91,23 @@ const bindTeam4User = async (params) => {
 	return res;
 };
 
+const addStatus4User = async (userId) => {
+	var query = User.update({_id: userId}, {$set:{status: 0}});
+	var res = null;
+	await query.exec((err, user) => {
+		if (err) {res = {};}
+		else {
+			res = user;
+		}
+	});
+	return res;
+};
+
 module.exports = {
 	findAllUsers,
 	findUser,
 	addUser,
 	bindTeam4User,
-	updatePrevPassword
+	updatePrevPassword,
+	addStatus4User
 };
