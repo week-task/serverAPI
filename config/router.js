@@ -10,12 +10,11 @@ module.exports = function () {
 	var router = new Router({
 		prefix: '/weeklyreportapi'
 	});
+	// user 接口
 	router.post('/user/add', User.addUser);
 	router.post('/login', User.login);
 
-	router.post('/getProjectListByTeam', Project.getProjectOptions);
-	router.get('/getProjectList', Project.getProjectList);	
-	router.post('/project/add', Project.addProject);
+	// task 接口
 	router.post('/task/add', Task.addTask);
 	router.post('/task/edit', Task.updateTaskById);
 	router.post('/task/del', Task.delTask);
@@ -31,5 +30,12 @@ module.exports = function () {
 	router.post('/team/delete', Team.deleteTeam);
 	router.post('/team/addLeader', Team.addTeamLeader);
 
-	return router
+	// project 接口
+	router.post('/getProjectListByTeam', Project.getProjectOptions);
+	router.get('/getProjectList', Project.getProjectList);	
+	router.post('/project/add', Project.addProject);
+	router.post('/project/edit', Project.editProject);
+	router.post('/project/delete', Project.deleteProject);
+
+	return router;
 }

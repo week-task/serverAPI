@@ -60,9 +60,49 @@ const addProject = async (project) => {
 	return res;
 };
 
+/**
+ * 编辑项目名称
+ * @param {*} params String
+ * @return {[Project]}
+ */
+const editProject = async (params) => {
+	var query = Project.findByIdAndUpdate(params.id, {
+		name:params.name
+	});
+	var res = [];
+	await query.exec((err, project) => {
+		if (err) {
+			res = [];
+		} else {
+			res = project;
+		}
+	});
+	return res;
+};
+
+/**
+ * 删除项目（逻辑删除，status 0 => 1）
+ * @param {*} params String
+ * @return {[Project]}
+ */
+const deleteProject = async (params) => {
+	var query = Project.update({_id: params.id}, {$set:{status: 1}});
+	var res = [];
+	await query.exec((err, project) => {
+		if (err) {
+			res = [];
+		} else {
+			res = project;
+		}
+	});
+	return res;
+};
+
 
 module.exports = {
 	findAllProjects,
 	findProject,
-	addProject
+	addProject,
+	editProject,
+	deleteProject
 };

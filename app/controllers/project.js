@@ -87,7 +87,52 @@ exports.addProject = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.editProject = async(ctx, next) => {
+	var projectId = xss(ctx.request.body.id);
+	var projectName = xss(ctx.request.body.name);
 
+	var project = await projectHelper.editProject({id: projectId, name: projectName});
+	if (!project) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			data: [],
+			message: '编辑项目出错'
+		};
+	} else {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: project,
+			message: '编辑成功'
+		};
+	}
+};
+
+/**
+ * 删除项目（逻辑删除）
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.deleteProject = async(ctx, next) => {
+	var projectId = xss(ctx.request.body.id);
+
+	var project = await projectHelper.deleteProject({id: projectId});
+	if (!project) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			data: [],
+			message: '删除项目出错'
+		};
+	} else {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: project,
+			message: '删除成功'
+		};
+	}
 };
 
 /**
