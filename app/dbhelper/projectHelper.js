@@ -6,6 +6,7 @@
 
 var mongoose =  require('mongoose');
 var Project = mongoose.model('Project');
+var Task = mongoose.model('Task');
 
 /**
  * 查找所有项目
@@ -14,7 +15,7 @@ var Project = mongoose.model('Project');
 const findAllProjects = async (params) => {
 	var query;
 	if (params.team) {
-		query = Project.find({'team':params.team, 'status': 0}).populate('team');
+		query = Project.find({'team':params.team}).populate('team');
 	} else {
 		// TODO 需要把查询出来的team对象里面的leader属性关联user表进行查询，得到username
 		query = Project.find({}).populate('team');
@@ -86,8 +87,21 @@ const editProject = async (params) => {
  * @return {[Project]}
  */
 const deleteProject = async (params) => {
-	var query = Project.update({_id: params.id}, {$set:{status: 1}});
-	var res = [];
+
+	var existProjectQuery = Task.find({project: params.id});
+	var taskList = [];
+	await existProjectQuery.exec((err, task) => {
+		if (err) { taskList = [];}
+		else {
+			taskList = task;
+		}
+	});
+	var query, res = [];
+	if (taskList.length > 0) {
+		query = Project.update({_id: params.id}, {$set:{status: 1}});
+	} else if (taskList.length === 0) {
+		query = Project.remove({_id: params.id});
+	}
 	await query.exec((err, project) => {
 		if (err) {
 			res = [];

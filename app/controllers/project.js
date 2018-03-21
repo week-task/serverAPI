@@ -131,7 +131,7 @@ exports.deleteProject = async(ctx, next) => {
 		ctx.body = {
 			code: 0,
 			data: project,
-			message: '删除成功'
+			message: '禁用或删除成功'
 		};
 	}
 };
@@ -176,6 +176,10 @@ function renderProjectsByTeams (data) {
 	// 重新组装结构,使其能为前端服务
 	var teams = [];
 	var tempObj = {};
+	var statusZh = {
+		0: '启用',
+		1: '禁用'
+	};
 
 	// get the relevant teams
 	for (var i = 0, size = data.length; i < size; i++) {
@@ -200,7 +204,9 @@ function renderProjectsByTeams (data) {
 				nItem.data.push({
 					id: mItem._id,
 					tid: nItem.tid, 
-					name: mItem.name 
+					name: mItem.name,
+					status: mItem.status,
+					statusZh: statusZh[mItem.status]
 				});
 			}
 		}

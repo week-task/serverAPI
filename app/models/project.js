@@ -16,6 +16,7 @@ var ProjectSchema = new Schema({
 		unique: true,
 		type: String
 	},
+	// name: String,
 	team: {type: Schema.Types.ObjectId, ref: 'Team'},
 	status: Number // 0:正常使用状态，1:已删除，这里是逻辑删除
 	// create_at: Date,
