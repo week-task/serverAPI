@@ -87,8 +87,8 @@ const editTeam = async (params) => {
 	// unbind team和leader
 	var unbindQuery = User.update({_id: prevTeam.leader._id}, {$unset: {team:1}});
 	await unbindQuery.exec((err, user) => {
-		console.log('xx ', err);
-		console.log('xx ', user);
+		// console.log('xx ', err);
+		// console.log('xx ', user);
 		// if (err) {res=[];}
 		// else {res=team;}
 	});
@@ -109,8 +109,8 @@ const editTeam = async (params) => {
 	// bind team和leader
 	var bindQuery = User.update({_id:params.user}, {$set: {team: params.teamId}});
 	await bindQuery.exec((err, user) => {
-		console.log('xx1 ', err);
-		console.log('xx1 ', user);
+		// console.log('xx1 ', err);
+		// console.log('xx1 ', user);
 	});
 	return res;
 };

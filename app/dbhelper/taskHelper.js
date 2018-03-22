@@ -96,8 +96,8 @@ const findTaskByPeriod = async (params) => {
 				ausers = users;
 			}
 		});
-		console.log('ausers => ', ausers);
-		console.log('params => ', params);
+		// console.log('ausers => ', ausers);
+		// console.log('params => ', params);
 		queryInner = Task.find({user:{$in:ausers}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
 			if (err2) {res = []}
@@ -118,8 +118,8 @@ const findTaskByPeriod = async (params) => {
 				ausers = users;
 			}
 		});
-		console.log('ausers 1 => ', ausers);
-		console.log('params 1 => ', params);
+		// console.log('ausers 1 => ', ausers);
+		// console.log('params 1 => ', params);
 		//根据用户数组,可以分用户角色查询出不同的task列表,如果是小组长,查询出来的是他本人和他下面的组员所有信息
 		//如果是本人,就$in里面只有自己的信息,查询出来自己的相关列表
 		queryInner = Task.find({user:{$in:ausers}, period: params.period});
@@ -129,7 +129,7 @@ const findTaskByPeriod = async (params) => {
 				res = tasks;
 			}
 		});
-		console.log(res);
+		// console.log(res);
 	}
 	return res;
 };

@@ -344,7 +344,17 @@ function renderProjects (data) {
 exports.exportWeeklyReport = async (ctx, next) => {
 
 	var period = xss(ctx.request.body.period);
-	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period});
+	var team = xss(ctx.request.body.team);
+	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period, team: team});
+	if (preData && preData.length === 0) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -2,
+			message: '第' + period + '期周报暂无数据'
+		};
+		return;
+	}
+
 	var data = renderProjects(preData);
 	var fileName = await xlsx.exportExcel(data, period);
 	// console.log('callback excel ', fileName);
