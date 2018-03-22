@@ -82,26 +82,15 @@ const editProject = async (params) => {
 };
 
 /**
- * 删除项目（逻辑删除，status 0 => 1）
+ * 启动项目，更改状态{status 1 => 0}
  * @param {*} params String
  * @return {[Project]}
  */
-const deleteProject = async (params) => {
-
-	var existProjectQuery = Task.find({project: params.id});
-	var taskList = [];
-	await existProjectQuery.exec((err, task) => {
-		if (err) { taskList = [];}
-		else {
-			taskList = task;
-		}
+const launchProject = async (params) => {
+	var query = Project.findByIdAndUpdate(params.id, {
+		status:0
 	});
-	var query, res = [];
-	if (taskList.length > 0) {
-		query = Project.update({_id: params.id}, {$set:{status: 1}});
-	} else if (taskList.length === 0) {
-		query = Project.remove({_id: params.id});
-	}
+	var res = [];
 	await query.exec((err, project) => {
 		if (err) {
 			res = [];
@@ -112,11 +101,45 @@ const deleteProject = async (params) => {
 	return res;
 };
 
+/**
+ * 删除项目（物理删除，但如果历史记录有相关的project，就禁用，status 0 => 1）
+ * @param {*} params String
+ * @return {[Project]}
+ */
+const deleteProject = async (params) => {
+	// 判断在task里面是否存在project，如果存在，状态就为禁用，不存在，就直接删除
+	var existProjectQuery = Task.find({project: params.id});
+	var taskList = [];
+	await existProjectQuery.exec((err, task) => {
+		if (err) { taskList = [];}
+		else {
+			taskList = task;
+		}
+	});
+	var query, res = {};
+	if (taskList.length > 0) {
+		query = Project.update({_id: params.id}, {$set:{status: 1}});
+		res.rescode = 0; // 禁用
+	} else if (taskList.length === 0) {
+		query = Project.remove({_id: params.id});
+		res.rescode = 1; // 物理删除
+	}
+	await query.exec((err, project) => {
+		if (err) {
+			res.err = err;
+		} else {
+			res.project = project;
+		}
+	});
+	return res;
+};
+
 
 module.exports = {
 	findAllProjects,
 	findProject,
 	addProject,
+	launchProject,
 	editProject,
 	deleteProject
 };

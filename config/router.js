@@ -34,6 +34,7 @@ module.exports = function () {
 	router.post('/getProjectListByTeam', Project.getProjectOptions);
 	router.post('/getProjectList', Project.getProjectList);	
 	router.post('/project/add', Project.addProject);
+	router.post('/project/launch', Project.addProject);
 	router.post('/project/edit', Project.editProject);
 	router.post('/project/delete', Project.deleteProject);
 
