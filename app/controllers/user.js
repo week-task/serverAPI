@@ -62,14 +62,13 @@ exports.login = async(ctx, next) => {
 		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
 	}
 
-
 	var salt = user.salt;
 	var hashPassword = bcrypt.hashSync(password, salt);
 	if (user.password === hashPassword) {
 		// username and password are correct
 		var teamInfo = {};
 		if (user.role === -1) {
-			teamInfo.name = '统领全局';
+			teamInfo.name = '总监';
 		} else {
 			teamInfo = await teamHelper.findTeam(user.team);
 		}
@@ -136,3 +135,26 @@ exports.addUser = async(ctx, next) => {
 		}
 	}
 }
+
+/**
+ * 修改密码
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.changePassword = async(ctx, next) => {
+	var userId = xss(ctx.request.body.userId);
+	var password = xss(ctx.request.body.password);
+	var user = await userHelper.findUserById({id:userId});
+	var salt = user.salt;
+	var hashPassword = bcrypt.hashSync(password, salt);
+	var passUser = await userHelper.changePassword({userId: userId, password: hashPassword});
+	if (passUser) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: passUser,
+			message: '密码已修改'
+		}
+	}
+};

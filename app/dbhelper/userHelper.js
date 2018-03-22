@@ -25,6 +25,23 @@ const findAllUsers = async () => {
 }
 
 /**
+ * 查找用户
+ * @return {[type]} [description]
+ */
+const findUserById = async (params) => {
+	var query = User.findOne({_id: params.id});
+	var res = null;
+	await query.exec(function(err, user) {
+		if(err) {
+			res = {}
+		}else {
+			res = user
+		}
+	})
+	return res;
+};
+
+/**
  * 查找所用用户
  * @return {[type]} [description]
  */
@@ -56,6 +73,22 @@ const addUser = async (user) => {
 	}).catch((err) => {
 		res = err;
 	});
+	return res;
+};
+
+/**
+ * 修改密码
+ * @return {[type]} [description]
+ */
+const changePassword = async (params) => {
+	var query = User.update({_id: params.userId}, {$set:{'password': params.password}});
+	var res = null;
+	await query.exec(function(err, user) {
+		if(err) {
+			res = {}
+		}
+	});
+	res = await findUserById({id: params.userId});
 	return res;
 };
 
@@ -106,8 +139,10 @@ const addStatus4User = async (userId) => {
 module.exports = {
 	findAllUsers,
 	findUser,
+	findUserById,
 	addUser,
 	bindTeam4User,
+	changePassword,
 	updatePrevPassword,
 	addStatus4User
 };
