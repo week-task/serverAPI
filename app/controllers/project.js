@@ -16,7 +16,6 @@ import projectHelper from '../dbhelper/projectHelper';
  * @return {[type]}        [description]
  */
 exports.getProjectOptions = async(ctx, next) => {
-	console.log('coming')
 	var team = xss(ctx.request.body.team);
 	var data = await projectHelper.findAllProjects({team: team});
 	if(data && data.length > 0) {
@@ -25,6 +24,13 @@ exports.getProjectOptions = async(ctx, next) => {
 			code: 0,
 			data: data,
 			message: '获取成功'
+		}
+	} else if (data.length === 0) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: data,
+			message: '暂无项目，请小组长添加项目'
 		}
 	}
 };

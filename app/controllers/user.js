@@ -10,6 +10,7 @@ var bcrypt = require('bcryptjs')
 var User = mongoose.model('User')
 var jsonwebtoken = require('jsonwebtoken')
 import userHelper from '../dbhelper/userHelper'
+import teamHelper from '../dbhelper/teamHelper'
 import {secret} from '../../config/index'
 
 /**
@@ -66,13 +67,21 @@ exports.login = async(ctx, next) => {
 	var hashPassword = bcrypt.hashSync(password, salt);
 	if (user.password === hashPassword) {
 		// username and password are correct
+		var teamInfo = {};
+		if (user.role === -1) {
+			teamInfo.name = '统领全局';
+		} else {
+			teamInfo = await teamHelper.findTeam(user.team);
+		}
 		var userInfo = {
 			_id: user._id,
 			parent_id: user.parent,
 			name: user.name,
 			role: user.role,
-			team: user.team
+			team: user.team,
+			teamName: teamInfo.name
 		};
+		
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
