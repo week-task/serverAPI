@@ -64,7 +64,7 @@ exports.login = async(ctx, next) => {
 
 	var salt = user.salt;
 	var hashPassword = bcrypt.hashSync(password, salt);
-	if (bcrypt.compareSync(password, hashPassword)) {
+	if (user.password === hashPassword) {
 		// username and password are correct
 		var userInfo = {
 			_id: user._id,
