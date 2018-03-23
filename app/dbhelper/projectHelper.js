@@ -14,11 +14,10 @@ var Task = mongoose.model('Task');
  */
 const findAllProjects = async (params) => {
 	var query;
-	if (params.team) {
-		query = Project.find({'team':params.team}).populate('team');
+	if (params.options) {
+		query = Project.find({team:params.team, status: 0}).populate('team');
 	} else {
-		// TODO 需要把查询出来的team对象里面的leader属性关联user表进行查询，得到username
-		query = Project.find({}).populate('team');
+		query = Project.find({team:params.team}).populate('team');
 	}
 	var res = [];
 	await query.exec(function(err, projects) {

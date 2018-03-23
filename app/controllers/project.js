@@ -17,7 +17,7 @@ import projectHelper from '../dbhelper/projectHelper';
  */
 exports.getProjectOptions = async(ctx, next) => {
 	var team = xss(ctx.request.body.team);
-	var data = await projectHelper.findAllProjects({team: team});
+	var data = await projectHelper.findAllProjects({team: team, options: true});
 	if(data && data.length > 0) {
 		ctx.status = 200;
 		ctx.body = {
