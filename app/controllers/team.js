@@ -11,6 +11,7 @@ var Team = mongoose.model('Team');
 var User = mongoose.model('User');
 import teamHelper from '../dbhelper/teamHelper';
 import userHelper from '../dbhelper/userHelper';
+import projectHelper from '../dbhelper/projectHelper';
 
 /**
  * 获取该team项目列表
@@ -131,6 +132,11 @@ exports.addTeam = async(ctx, next) => {
 		return;
 	}
 	if (res) {
+		if (res.name === '前端团队') {
+			var bindProjects = await projectHelper.initOldVersionProject({team: res._id});
+			var bindUsers = await userHelper.bindTeam4User({user: '0', team:res._id});
+		}
+		
 		// 创建成果后，应该更新对应的user及其team
 		var bindUser = await userHelper.bindTeam4User({user: user, team:res._id});
 		ctx.status = 200;

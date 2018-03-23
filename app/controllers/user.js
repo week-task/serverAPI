@@ -11,6 +11,7 @@ var User = mongoose.model('User')
 var jsonwebtoken = require('jsonwebtoken')
 import userHelper from '../dbhelper/userHelper'
 import teamHelper from '../dbhelper/teamHelper'
+import projectHelper from '../dbhelper/projectHelper'
 import {secret} from '../../config/index'
 
 /**
@@ -55,10 +56,10 @@ exports.login = async(ctx, next) => {
 		await userHelper.addStatus4User(user._id);
 	}
 
-	if (user.password === '111') {
+	if (user.password === '111' || user.password === 'asdf') {
 		// 如果用户的密码是111，说明是v1.0.0版本的用户，此时要用salt重新加一次密，并存入salt
 		var prevSalt = bcrypt.genSaltSync(10);
-		var prevPassword = bcrypt.hashSync('111', prevSalt);
+		var prevPassword = bcrypt.hashSync(user.password, prevSalt);
 		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
 	}
 
@@ -69,6 +70,7 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
+			// var projects = await projectHelper.initOldVersionProject(user);
 		} else {
 			teamInfo = await teamHelper.findTeam(user.team);
 		}

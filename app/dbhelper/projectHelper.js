@@ -133,6 +133,23 @@ const deleteProject = async (params) => {
 	return res;
 };
 
+/**
+ * 新增老版本的项目字段所属team以及status（status 0）
+ * @param {*} params String
+ * @return {[Project]}
+ */
+const initOldVersionProject = async (params) => {
+	var query = Project.update({},{$set: {status:0, team:params.team}}, {multi: 1});
+	var res = [];
+	await query.exec((err, project) => {
+		if (err) {
+			res = [];
+		} else {
+			res = project;
+		}
+	});
+	return res;
+};
 
 module.exports = {
 	findAllProjects,
@@ -140,5 +157,6 @@ module.exports = {
 	addProject,
 	launchProject,
 	editProject,
-	deleteProject
+	deleteProject,
+	initOldVersionProject
 };

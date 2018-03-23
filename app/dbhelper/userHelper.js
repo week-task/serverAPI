@@ -112,8 +112,18 @@ const updatePrevPassword = async (params) => {
 	return user;
 };
 
+/**
+ * 初始化team相关的User
+ * @return {[type]} [description]
+ */
 const bindTeam4User = async (params) => {
-	var query = User.update({_id: params.user}, {$set:{team: params.team}});
+	var query;
+	if (params.user === '0') {
+		query = User.update({},{$set: {status:0, team:params.team}}, {multi: 1});
+	} else {
+		query = User.update({_id: params.user}, {$set:{team: params.team}});
+	}
+	
 	var res = null;
 	await query.exec((err, user) => {
 		if (err) {res = {};}
