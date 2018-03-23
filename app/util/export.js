@@ -65,7 +65,7 @@ function exportXlsx (data, period) {
 	return new Promise((resolve, reject) => {
 
 		const excelPath = 'dist/spa-mat/statics/第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx';
-
+		const fileName = '第' + period + '期' + moment().format('YYYY-MM-DD HH:mm:s') + '周报.xlsx';
 		file
 			.saveAs()
 			.pipe(fs.createWriteStream('www/' + excelPath))
@@ -73,7 +73,7 @@ function exportXlsx (data, period) {
 				reject(err);
 			})
 			.on('finish', () => {
-				resolve(excelPath);
+				resolve(fileName);
 			})
 	});
 }
