@@ -147,8 +147,22 @@ exports.addUser = async(ctx, next) => {
 exports.changePassword = async(ctx, next) => {
 	var userId = xss(ctx.request.body.userId);
 	var password = xss(ctx.request.body.password);
+	var oldPassword = xss(ctx.request.body.oldPassword);
 	var user = await userHelper.findUserById({id:userId});
 	var salt = user.salt;
+
+	var oldHashPassword = bcrypt.hashSync(oldPassword, salt);
+
+	if (oldHashPassword !== user.password) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			data: [],
+			message: '原密码对不上，不能修改！'
+		};
+		return;
+	}
+
 	var hashPassword = bcrypt.hashSync(password, salt);
 	var passUser = await userHelper.changePassword({userId: userId, password: hashPassword});
 	if (passUser) {
