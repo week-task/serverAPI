@@ -184,3 +184,13 @@ exports.changePassword = async(ctx, next) => {
 		}
 	}
 };
+
+/**
+ * 获取用户列表
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.getUserList = async(ctx, next) => {
+	// TODO 这里需要几个判断条件，来判断需要返回的user list
+};
