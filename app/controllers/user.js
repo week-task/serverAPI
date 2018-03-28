@@ -294,6 +294,28 @@ exports.changePassword = async(ctx, next) => {
 };
 
 /**
+ * 重置密码
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.resetPass = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+
+	var existUser = await userHelper.findUserById({id: userId});
+	var resetpass = bcrypt.hashSync('111', existUser.salt);
+	var resetPassUser = await userHelper.changePassword({userId: userId, password: resetpass});
+	if (resetPassUser) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: resetPassUser,
+			message: '密码已重置'
+		}
+	}
+};
+
+/**
  * 获取用户列表
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
