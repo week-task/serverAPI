@@ -25,6 +25,29 @@ const findAllUsers = async () => {
 }
 
 /**
+ * 查找该team下所有users
+ * @return {[type]} [description]
+ */
+const findUsersByTeam = async (params) => {
+	var query;
+	if (params.role) {
+		query = User.find({team: params.team, role: params.role});
+	} else {
+		query = User.find({team: params.team});
+	}
+	
+	var res = [];
+	await query.exec(function(err, users) {
+		if (err) {
+			res = [];
+		} else {
+			res = users;
+		}
+	})
+	return res
+}
+
+/**
  * 查找用户
  * @return {[type]} [description]
  */
@@ -64,16 +87,18 @@ const findUser = async (name) => {
  * @return {[type]}      [description]
  */
 const addUser = async (user) => {
-	// user = await user.save();
-	// return user
-
 	var res = {code: 0};
-	await user.save().then((res) => {
-		res = user;
-	}).catch((err) => {
+	await user.save().then((res) => {}).catch((err) => {
 		res = err;
 	});
 	return res;
+	// var res = {code: 0};
+	// await user.save().then((res) => {
+	// 	res = user;
+	// }).catch((err) => {
+	// 	res = err;
+	// });
+	// return res;
 };
 
 /**
@@ -146,13 +171,27 @@ const addStatus4User = async (userId) => {
 	return res;
 };
 
+const updateUserParentSelf = async (params) => {
+	var query = User.update({_id: params.id}, {$set:{parent: params.id}});
+	var res = null;
+	await query.exec((err, user) => {
+		if (err) {res = {};}
+		else {
+			res = user;
+		}
+	});
+	return res;
+}
+
 module.exports = {
 	findAllUsers,
 	findUser,
 	findUserById,
+	findUsersByTeam,
 	addUser,
 	bindTeam4User,
 	changePassword,
 	updatePrevPassword,
-	addStatus4User
+	addStatus4User,
+	updateUserParentSelf
 };

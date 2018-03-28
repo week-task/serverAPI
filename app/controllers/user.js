@@ -115,36 +115,75 @@ exports.login = async(ctx, next) => {
  */
 exports.addUser = async(ctx, next) => {
 	var userName = xss(ctx.request.body.name);
-	var password = xss(ctx.request.body.password);
+	// var password = xss(ctx.request.body.password);
 	var project = xss(ctx.request.body.project);
 	var parent = xss(ctx.request.body.parent);
 	var role = xss(ctx.request.body.role);
+	var status = xss(ctx.request.body.status);
 	var team = xss(ctx.request.body.team);
+	// // console.log('team', team);
+	// var userObj = team === undefined ? {
+	// 	_id: new mongoose.Types.ObjectId(),
+	// 	name: userName,
+	// 	password: '111',
+	// 	role: role,
+	// 	status: status,
+	// 	parent: parent
+	// } : {
+	// 	_id: new mongoose.Types.ObjectId(),
+	// 	name: userName,
+	// 	password: '111',
+	// 	role: role,
+	// 	status: status,
+	// 	parent: parent,
+	// 	team: team
+	// };
 
-	var userObj = team === undefined ? {
+	// 对密码进行加密
+	var salt = bcrypt.genSaltSync(10);
+	var hashPassword = bcrypt.hashSync('111', salt);
+
+	var userObj = new User({
 		_id: new mongoose.Types.ObjectId(),
 		name: userName,
-		password: password,
+		password: hashPassword,
+		salt: salt,
 		role: role,
-		parent: parent
-	} : {
-		_id: new mongoose.Types.ObjectId(),
-		name: userName,
-		password: password,
-		role: role,
+		status: status,
 		parent: parent,
 		team: team
-	};
+	});
 
 	var user = new User(userObj);
-	var user2 = await userHelper.addUser(user);
-	if (user2) {
+	var newUser = await userHelper.addUser(user);
+	if (newUser.code === 11000) {
+		ctx.status = 500;
+		ctx.body = {
+			code: 0,
+			message: '真笨,已经有这么个人了'
+		};
+		return;
+	}
+	if (newUser.code === 0) {
+		if (newUser.role === 1) {
+			var changeUser = await userHelper.updateUserParentSelf({id: newUser._id});
+			if (!changeUser) {
+				ctx.status = 500;
+				ctx.body = {
+					code: -1,
+					data: [],
+					message: '新增小组长失败'
+				}
+				return;
+			}
+		}
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			data: data,
+			data: newUser,
 			message: '新增成功'
 		}
+		
 	}
 }
 
@@ -193,4 +232,135 @@ exports.changePassword = async(ctx, next) => {
  */
 exports.getUserList = async(ctx, next) => {
 	// TODO 这里需要几个判断条件，来判断需要返回的user list
+	var type = xss(ctx.request.body.type);
+	var team = xss(ctx.request.body.team);
+
+	var userList;
+	if (type === 'options') {
+		userList = await userHelper.findUsersByTeam({team: team, role: 1});
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: userList,
+				message: '获取成功'
+			};
+		}
+	} else if (type ==='all') {
+		userList = await userHelper.findUsersByTeam({team: team});
+		console.log('userList,  ', userList);
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: renderUsersByTeams(userList),
+				message: '获取成功'
+			}
+		}
+	}
 };
+
+/**
+ * 排序获取的User列表
+ * @param objArr
+ * @param field
+ * @returns {Query|Array.<T>|*|Aggregate}
+ */
+function sortByPid(objArr, field) {
+
+	// 指定排序的比较函数
+	const compare = (property) => {
+		return (obj1, obj2) => {
+			var value1 = obj1[property];
+			var value2 = obj2[property];
+			return value1 - value2;     // 升序
+		}
+	};
+
+	return objArr.sort(compare(field));
+}
+
+/**
+ * 从project表读出,封装成前端需要的project list
+ * @param data
+ * @returns {Array}
+ */
+function renderUsersByTeams (data) {
+	// 目标结构
+	var dataMock = [{
+		user: '**小组长',
+		selected: [],
+		data: [
+			{id: 1, name: '项目1'},
+			{id: 2, name: '项目2'},
+			{id: 3, name: '项目3'}
+		]
+	}];
+	
+	// 重新组装结构,使其能为前端服务
+	var users = [];
+	// var tempObj = {};
+	var statusZh = {
+		0: '在职',
+		1: '离职'
+	};
+	var roleZh = {
+		0: '团队负责人',
+		1: '小组长',
+		2: '组员',
+	};
+
+	// get the relevant users
+	for (var i = 0, size = data.length; i < size; i++) {
+		if (data[i].role === 1) {
+			var item = {
+				uid: data[i]._id,
+				user: data[i].name, 
+				selected: [],
+				data: []
+			};
+			users.push(item);
+		}
+	}
+
+	// 组装成前端需要的数据结构
+	for (var m = 0, mSize = users.length; m < mSize; m++) { // 小组长
+		var mItem = users[m];
+		for (var n = 0, nSize = data.length; n < nSize; n++) { // 循环users，匹配对应的parent
+			var nItem = data[n];
+			console.log('nItem ----------------------------> ', nItem)
+			// console.log('nItem.parent === mItem.uid  ', nItem.parent === mItem.uid);
+			// console.log('mongoose.Types.ObjectId(nItem.parent) === mItem.uid  ', mongoose.Types.ObjectId(nItem.parent) === mItem.uid);
+			// console.log('nItem.parent === mItem.uid.toString()  ', nItem.parent === mItem.uid.toString());
+			// console.log('nItem._id !== mItem.uid  ', nItem._id !== mItem.uid);
+			if (nItem.parent === mItem.uid.toString() && nItem._id !== mItem.uid) {
+				console.log('nItem ==========================> ', nItem)
+				mItem.data.push({
+					id: nItem._id,
+					name: nItem.name,
+					status: nItem.status,
+					statusZh: statusZh[nItem.status],
+					role: nItem.role,
+					roleZh: roleZh[nItem.role],
+					team: nItem.team
+				});
+			} else {
+				console.log('mItem => ', mItem)
+				console.log('nItem => ', nItem)
+				console.log('nItem.parent => ', nItem.parent)
+				console.log('mItem.uid => ', mItem.uid)
+				console.log('nItem._id => ', nItem._id)
+				console.log('mItem.uid => ', mItem.uid)
+				console.log('typeof nItem.parent => ', typeof nItem.parent)
+				console.log('typeof nItem.parent => ', typeof mongoose.Types.ObjectId(nItem.parent))
+				console.log('typeof mItem.uid => ', typeof mItem.uid)
+				console.log('typeof nItem._id => ', typeof nItem._id)
+				console.log('typeof mItem.uid => ', typeof mItem.uid)
+			}
+		}
+	}
+
+	sortByPid(users, 'uid');
+
+	return users;
+}
