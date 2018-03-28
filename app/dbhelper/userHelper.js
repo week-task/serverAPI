@@ -8,7 +8,6 @@ var mongoose =  require('mongoose');
 var User = mongoose.model('User');
 var Task = mongoose.model('Task');
 
-
 /**
  * 查找所用用户
  * @return {[type]} [description]
@@ -121,10 +120,8 @@ const editUser = async (params) => {
 	// 通过传入的用户判断，拿到该用户的id，去匹配user里面的parent，如果大于1，就认定有下级组员，就不可以修改
 
 	var isReadyUser = await findUserById({id: params.userId});
-	// console.log('isComing---->', (isReadyUser.role === 1 && params.role === '2'));
 	if (isReadyUser.role === 1 && params.role === '2') {
 		var existUsers = await findUsersByParent({parent: isReadyUser.parent});
-		// console.log('existUsers => ', existUsers);
 		if (existUsers.length > 1) {
 			return {code: 500};
 		}

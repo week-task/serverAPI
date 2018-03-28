@@ -419,13 +419,7 @@ function renderUsersByTeams (data) {
 		var mItem = users[m];
 		for (var n = 0, nSize = data.length; n < nSize; n++) { // 循环users，匹配对应的parent
 			var nItem = data[n];
-			// console.log('nItem ----------------------------> ', nItem)
-			// console.log('nItem.parent === mItem.uid  ', nItem.parent === mItem.uid);
-			// console.log('mongoose.Types.ObjectId(nItem.parent) === mItem.uid  ', mongoose.Types.ObjectId(nItem.parent) === mItem.uid);
-			// console.log('nItem.parent === mItem.uid.toString()  ', nItem.parent === mItem.uid.toString());
-			// console.log('nItem._id !== mItem.uid  ', nItem._id !== mItem.uid);
 			if (nItem.parent === mItem.uid.toString()) {
-				// console.log('nItem ==========================> ', nItem)
 				mItem.data.push({
 					id: nItem._id,
 					name: nItem.name,
@@ -436,19 +430,7 @@ function renderUsersByTeams (data) {
 					team: nItem.team,
 					parent: nItem.parent
 				});
-			} else {
-				// console.log('mItem => ', mItem)
-				// console.log('nItem => ', nItem)
-				// console.log('nItem.parent => ', nItem.parent)
-				// console.log('mItem.uid => ', mItem.uid)
-				// console.log('nItem._id => ', nItem._id)
-				// console.log('mItem.uid => ', mItem.uid)
-				// console.log('typeof nItem.parent => ', typeof nItem.parent)
-				// console.log('typeof nItem.parent => ', typeof mongoose.Types.ObjectId(nItem.parent))
-				// console.log('typeof mItem.uid => ', typeof mItem.uid)
-				// console.log('typeof nItem._id => ', typeof nItem._id)
-				// console.log('typeof mItem.uid => ', typeof mItem.uid)
-			}
+			} 
 		}
 	}
 
