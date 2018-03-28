@@ -43,6 +43,23 @@ const findTaskById = async (id) => {
 };
 
 /**
+ * 根据用户查找task
+ * @return {[type]} [description]
+ */
+const findTaskByUser = async (id) => {
+	var query = Task.find({user: id});
+	var res = [];
+	await query.exec(function(err, tasks) {
+		if (err) {
+			res = [];
+		} else {
+			res = tasks;
+		}
+	});
+	return res;
+};
+
+/**
  * 通过period,status,user查询上一期未完成的任务
  * @param params
  * @returns {Array}
@@ -187,6 +204,7 @@ const delTask = async (id) => {
 
 module.exports = {
 	findAllTasks,
+	findTaskByUser,
 	findTaskById,
 	findTaskByPeriod,
 	isExistTask,

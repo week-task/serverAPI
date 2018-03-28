@@ -6,6 +6,8 @@
 
 var mongoose =  require('mongoose');
 var User = mongoose.model('User');
+var Task = mongoose.model('Task');
+
 
 /**
  * 查找所用用户
@@ -112,24 +114,9 @@ const addUser = async (user) => {
 		res = err;
 	});
 	return res;
-	// var res = {code: 0};
-	// await user.save().then((res) => {
-	// 	res = user;
-	// }).catch((err) => {
-	// 	res = err;
-	// });
-	// return res;
 };
 
 const editUser = async (params) => {
-	// console.log('params => ', params);
-	// var query = User.findByIdAndUpdate(params.userId, {
-	// 	name:params.userName,
-	// 	parent: params.parent,
-	// 	role: params.role,
-	// 	status: params.status
-	// });
-
 	// 判断角色 1->2 用户下级是否还有组员：是否存在多个相同的parent
 	// 通过传入的用户判断，拿到该用户的id，去匹配user里面的parent，如果大于1，就认定有下级组员，就不可以修改
 
@@ -162,6 +149,29 @@ const editUser = async (params) => {
 		await updateUserParentSelf({id: params.userId});
 	}
 	
+	return res;
+};
+
+/**
+ * 离职或删除用户
+ * @param {Object} params 
+ */
+const deleteUser = async (params) => {
+	var query, res = {};
+	if (params.options === 'off') {
+		query = User.update({_id: params.id}, {$set:{status: 1}});
+		res.rescode = 0; // 离职
+	} else if (params.options === 'on') {
+		query = User.remove({_id: params.id});
+		res.rescode = 1; // 物理删除
+	}
+	await query.exec((err, user) => {
+		if (err) {
+			res.err = err;
+		} else {
+			res.user = user;
+		}
+	});
 	return res;
 };
 
@@ -258,6 +268,7 @@ module.exports = {
 	findUsersByTeam,
 	addUser,
 	editUser,
+	deleteUser,
 	bindTeam4User,
 	changePassword,
 	updatePrevPassword,

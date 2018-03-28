@@ -12,6 +12,7 @@ var jsonwebtoken = require('jsonwebtoken')
 import userHelper from '../dbhelper/userHelper'
 import teamHelper from '../dbhelper/teamHelper'
 import projectHelper from '../dbhelper/projectHelper'
+import taskHelper from '../dbhelper/taskHelper'
 import {secret} from '../../config/index'
 
 /**
@@ -47,7 +48,7 @@ exports.login = async(ctx, next) => {
 		ctx.status = 401;
 		ctx.body = {
 			code: -1,
-			message: '此人已离职'
+			message: '您已离职'
 		};
 		return;
 	}
@@ -201,6 +202,57 @@ exports.editUser = async(ctx, next) => {
 			data: updateUser,
 			message: '修改用户成功'
 		}
+	}
+};
+
+/**
+ * 离职或者删除用户
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.deleteUser = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+
+	// 如果是有关联的相关任务，就只能设置为离职状态
+	// 如果角色为1的小组长，就不能被删除，可以通过关联任务设置为离职
+	// 如果角色为2的组员，只要没有关联的任务，均可以被物理删除
+	var task = await taskHelper.findTaskByUser(userId);
+	console.log(task);
+	if (task.length > 0) {
+		var offUser = await userHelper.deleteUser({id: userId, options: 'off'});
+		if (offUser.rescode === 0) {
+			ctx.status = 500;
+			ctx.body = {
+				code: -1,
+				data: task,
+				message: '这个人关联历史任务，不可以删除，将变更为离职状态！'
+			};
+			return;
+		}
+	}
+
+	var relevantUser = await userHelper.findUserById({id: userId});
+	var parentUser = await userHelper.findUsersByParent({parent: userId});
+
+	if (relevantUser.role === 1 && parentUser.length > 1) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			data: task,
+			message: '这位小组长下面还有组员，不可以删除！'
+		};
+		return;
+	}
+
+	var user = await userHelper.deleteUser({id: userId, options: 'on'});
+	if (user.rescode === 1) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: [],
+			message: '删除成功'
+		};
 	}
 };
 

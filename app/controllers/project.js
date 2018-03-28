@@ -166,7 +166,7 @@ exports.deleteProject = async(ctx, next) => {
 		ctx.body = {
 			code: 0,
 			data: project,
-			message: project.rescode === 0 ? '该任务存在关联任务，已禁用':'已删除'
+			message: project.rescode === 0 ? '该项目存在关联任务，已禁用':'已删除'
 		};
 	}
 };

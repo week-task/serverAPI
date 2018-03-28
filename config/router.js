@@ -13,6 +13,7 @@ module.exports = function () {
 	// user 接口
 	router.post('/user/add', User.addUser);
 	router.post('/user/edit', User.editUser);
+	router.post('/user/delete', User.deleteUser);
 	router.post('/getUserList', User.getUserList);
 	router.post('/user/editpassword', User.changePassword);
 	router.post('/login', User.login);
