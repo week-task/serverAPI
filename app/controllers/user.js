@@ -121,24 +121,7 @@ exports.addUser = async(ctx, next) => {
 	var role = xss(ctx.request.body.role);
 	var status = xss(ctx.request.body.status);
 	var team = xss(ctx.request.body.team);
-	// // console.log('team', team);
-	// var userObj = team === undefined ? {
-	// 	_id: new mongoose.Types.ObjectId(),
-	// 	name: userName,
-	// 	password: '111',
-	// 	role: role,
-	// 	status: status,
-	// 	parent: parent
-	// } : {
-	// 	_id: new mongoose.Types.ObjectId(),
-	// 	name: userName,
-	// 	password: '111',
-	// 	role: role,
-	// 	status: status,
-	// 	parent: parent,
-	// 	team: team
-	// };
-
+	
 	// 对密码进行加密
 	var salt = bcrypt.genSaltSync(10);
 	var hashPassword = bcrypt.hashSync('111', salt);
@@ -156,6 +139,7 @@ exports.addUser = async(ctx, next) => {
 
 	var user = new User(userObj);
 	var newUser = await userHelper.addUser(user);
+	// console.log('newUser', newUser);
 	if (newUser.code === 11000) {
 		ctx.status = 500;
 		ctx.body = {
@@ -164,28 +148,61 @@ exports.addUser = async(ctx, next) => {
 		};
 		return;
 	}
-	if (newUser.code === 0) {
-		if (newUser.role === 1) {
-			var changeUser = await userHelper.updateUserParentSelf({id: newUser._id});
-			if (!changeUser) {
-				ctx.status = 500;
-				ctx.body = {
-					code: -1,
-					data: [],
-					message: '新增小组长失败'
-				}
-				return;
+	
+	if (newUser && newUser.role === 1) {
+		var changeUser = await userHelper.updateUserParentSelf({id: newUser._id});
+		// console.log('changeUser ', changeUser);
+		if (!changeUser) {
+			ctx.status = 500;
+			ctx.body = {
+				code: -1,
+				data: [],
+				message: '新增小组长失败'
 			}
+			return;
 		}
+	}
+	ctx.status = 200;
+	ctx.body = {
+		code: 0,
+		data: newUser,
+		message: '新增成功'
+	}
+}
+
+/**
+ * 用户编辑
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.editUser = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+	var userName = xss(ctx.request.body.name);
+	var parent = xss(ctx.request.body.parent);
+	var role = xss(ctx.request.body.role);
+	var status = xss(ctx.request.body.status);
+	var team = xss(ctx.request.body.team);
+
+	var updateUser = await userHelper.editUser({userId: userId, userName: userName, parent: parent, role: role, status: status});
+	if (updateUser.code === 500) {
+		ctx.status = 500;
+		ctx.body = {
+			code: -1,
+			data: [],
+			message: '该小组长还存在组员，不可以变更角色！'
+		};
+		return;
+	} 
+	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
-			data: newUser,
-			message: '新增成功'
+			data: updateUser,
+			message: '修改用户成功'
 		}
-		
 	}
-}
+};
 
 /**
  * 修改密码
@@ -248,7 +265,7 @@ exports.getUserList = async(ctx, next) => {
 		}
 	} else if (type ==='all') {
 		userList = await userHelper.findUsersByTeam({team: team});
-		console.log('userList,  ', userList);
+		// console.log('userList,  ', userList);
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
@@ -328,13 +345,13 @@ function renderUsersByTeams (data) {
 		var mItem = users[m];
 		for (var n = 0, nSize = data.length; n < nSize; n++) { // 循环users，匹配对应的parent
 			var nItem = data[n];
-			console.log('nItem ----------------------------> ', nItem)
+			// console.log('nItem ----------------------------> ', nItem)
 			// console.log('nItem.parent === mItem.uid  ', nItem.parent === mItem.uid);
 			// console.log('mongoose.Types.ObjectId(nItem.parent) === mItem.uid  ', mongoose.Types.ObjectId(nItem.parent) === mItem.uid);
 			// console.log('nItem.parent === mItem.uid.toString()  ', nItem.parent === mItem.uid.toString());
 			// console.log('nItem._id !== mItem.uid  ', nItem._id !== mItem.uid);
-			if (nItem.parent === mItem.uid.toString() && nItem._id !== mItem.uid) {
-				console.log('nItem ==========================> ', nItem)
+			if (nItem.parent === mItem.uid.toString()) {
+				// console.log('nItem ==========================> ', nItem)
 				mItem.data.push({
 					id: nItem._id,
 					name: nItem.name,
@@ -342,20 +359,21 @@ function renderUsersByTeams (data) {
 					statusZh: statusZh[nItem.status],
 					role: nItem.role,
 					roleZh: roleZh[nItem.role],
-					team: nItem.team
+					team: nItem.team,
+					parent: nItem.parent
 				});
 			} else {
-				console.log('mItem => ', mItem)
-				console.log('nItem => ', nItem)
-				console.log('nItem.parent => ', nItem.parent)
-				console.log('mItem.uid => ', mItem.uid)
-				console.log('nItem._id => ', nItem._id)
-				console.log('mItem.uid => ', mItem.uid)
-				console.log('typeof nItem.parent => ', typeof nItem.parent)
-				console.log('typeof nItem.parent => ', typeof mongoose.Types.ObjectId(nItem.parent))
-				console.log('typeof mItem.uid => ', typeof mItem.uid)
-				console.log('typeof nItem._id => ', typeof nItem._id)
-				console.log('typeof mItem.uid => ', typeof mItem.uid)
+				// console.log('mItem => ', mItem)
+				// console.log('nItem => ', nItem)
+				// console.log('nItem.parent => ', nItem.parent)
+				// console.log('mItem.uid => ', mItem.uid)
+				// console.log('nItem._id => ', nItem._id)
+				// console.log('mItem.uid => ', mItem.uid)
+				// console.log('typeof nItem.parent => ', typeof nItem.parent)
+				// console.log('typeof nItem.parent => ', typeof mongoose.Types.ObjectId(nItem.parent))
+				// console.log('typeof mItem.uid => ', typeof mItem.uid)
+				// console.log('typeof nItem._id => ', typeof nItem._id)
+				// console.log('typeof mItem.uid => ', typeof mItem.uid)
 			}
 		}
 	}

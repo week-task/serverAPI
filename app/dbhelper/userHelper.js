@@ -48,6 +48,24 @@ const findUsersByTeam = async (params) => {
 }
 
 /**
+ * 查找该parent下所有users
+ * @return {[type]} [description]
+ */
+const findUsersByParent = async (params) => {
+	var query = User.find({parent: params.parent});
+	
+	var res = [];
+	await query.exec(function(err, users) {
+		if (err) {
+			res = [];
+		} else {
+			res = users;
+		}
+	})
+	return res
+}
+
+/**
  * 查找用户
  * @return {[type]} [description]
  */
@@ -88,7 +106,9 @@ const findUser = async (name) => {
  */
 const addUser = async (user) => {
 	var res = {code: 0};
-	await user.save().then((res) => {}).catch((err) => {
+	await user.save().then((user) => {
+		res = user;
+	}).catch((err) => {
 		res = err;
 	});
 	return res;
@@ -99,6 +119,50 @@ const addUser = async (user) => {
 	// 	res = err;
 	// });
 	// return res;
+};
+
+const editUser = async (params) => {
+	// console.log('params => ', params);
+	// var query = User.findByIdAndUpdate(params.userId, {
+	// 	name:params.userName,
+	// 	parent: params.parent,
+	// 	role: params.role,
+	// 	status: params.status
+	// });
+
+	// 判断角色 1->2 用户下级是否还有组员：是否存在多个相同的parent
+	// 通过传入的用户判断，拿到该用户的id，去匹配user里面的parent，如果大于1，就认定有下级组员，就不可以修改
+
+	var isReadyUser = await findUserById({id: params.userId});
+	// console.log('isComing---->', (isReadyUser.role === 1 && params.role === '2'));
+	if (isReadyUser.role === 1 && params.role === '2') {
+		var existUsers = await findUsersByParent({parent: isReadyUser.parent});
+		// console.log('existUsers => ', existUsers);
+		if (existUsers.length > 1) {
+			return {code: 500};
+		}
+	} 
+
+	var query = User.update({_id: params.userId}, {$set:{
+		name:params.userName,
+		parent: params.parent,
+		role: params.role,
+		status: params.status
+	}});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+
+	if (params.role === '1') {
+		await updateUserParentSelf({id: params.userId});
+	}
+	
+	return res;
 };
 
 /**
@@ -172,11 +236,15 @@ const addStatus4User = async (userId) => {
 };
 
 const updateUserParentSelf = async (params) => {
+	// console.log('update user id ', params.id);
 	var query = User.update({_id: params.id}, {$set:{parent: params.id}});
 	var res = null;
 	await query.exec((err, user) => {
-		if (err) {res = {};}
-		else {
+		if (err) {
+			// console.log('err', err);
+			res = {};
+		} else {
+			// console.log('user', user);
 			res = user;
 		}
 	});
@@ -189,9 +257,11 @@ module.exports = {
 	findUserById,
 	findUsersByTeam,
 	addUser,
+	editUser,
 	bindTeam4User,
 	changePassword,
 	updatePrevPassword,
 	addStatus4User,
-	updateUserParentSelf
+	updateUserParentSelf,
+	findUsersByParent
 };
