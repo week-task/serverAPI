@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var Task = mongoose.model('Task');
 var xlsx = require('../util/export');
 import TaskHelper from '../dbhelper/taskHelper';
+import userHelper from '../dbhelper/userHelper';
 
 /**
  * 新增任务
@@ -335,6 +336,26 @@ function renderProjects (data) {
 
 	return projects;
 }
+
+/**
+ * 判断出当期没有完成周报的用户
+ * @param ctx
+ * @param next
+ */
+exports.unfinishedUsers = async (ctx, next) => {
+	var team = xss(ctx.request.body.team);
+	var period = xss(ctx.request.body.period);
+
+	// 首先查找出该team下的所有组员
+	var allUsers = userHelper.findUsersByTeam({team: team});
+	// 根据period查询出该期task已经有哪些人已经填写过，然后这里要先判断是否存在新的任务，一旦有，说明填写过，如果没有，
+	
+	// 就判断task状态、进度、备注、所属项目是否跟上期一致
+
+	// 如果一致，说明只是登录了，并没有更新任务，
+
+	//如果不一致，说明已经有任务进行了修改，算完成了周报
+};
 
 /**
  * 导出周报,格式为excel
