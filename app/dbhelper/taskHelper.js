@@ -149,6 +149,31 @@ const findTaskByPeriod = async (params) => {
 };
 
 /**
+ * 本期完成周报人
+ * @param {*} params 参数对象
+ * @returns {[users]}
+ */
+const finishedUsers = async (params) => {
+	var res, ausers = [];
+	var query = User.find({"team": params.team});
+	// 查出用户数组,方便查询相关任务
+	await query.exec((err, users) => {
+		if (err) { res = []; }
+		else {
+			ausers = users;
+		}
+	});
+	var queryInner = Task.find({user:{$in:ausers}, period: params.period});
+	await queryInner.distinct('user').populate('user').populate('project').exec((err2, tasks) => {
+		if (err2) {res = []}
+		else {
+			res = tasks;
+		}
+	});
+	return res;
+};
+
+/**
  * 增加task
  * @param  {[Task]} task [mongoose.model('Task')]
  * @return {[type]}      [description]
@@ -209,6 +234,7 @@ module.exports = {
 	findTaskByPeriod,
 	isExistTask,
 	checkUnfinishTask,
+	finishedUsers,
 	addTask,
 	editTask,
 	delTask

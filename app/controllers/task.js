@@ -24,7 +24,7 @@ exports.addTask = async(ctx, next) => {
 	var projectId = xss(ctx.request.body.project_id);
 	var progress = xss(ctx.request.body.progress);
 	var status = xss(ctx.request.body.status);
-	var remark = xss(ctx.request.body.remark);
+	var remark = xss(ctx.request.body.remark);	
 	var task = new Task({
 		name: taskName,
 		user: userId,
@@ -347,13 +347,38 @@ exports.unfinishedUsers = async (ctx, next) => {
 	var period = xss(ctx.request.body.period);
 
 	// 首先查找出该team下的所有组员
-	var allUsers = userHelper.findUsersByTeam({team: team});
+	var allUsers = await userHelper.findUsersByTeam({team: team});
 	// 根据period查询出该期task已经有哪些人已经填写过，然后这里要先判断是否存在新的任务，一旦有，说明填写过，如果没有，
-	
-	// 就判断task状态、进度、备注、所属项目是否跟上期一致
+	var finishedUsers = await TaskHelper.finishedUsers({team: team, period: period});
+	// console.log('finishedUsers: ', finishedUsers);
 
+	finishedUsers.map((value, index, array) => {
+		finishedUsers[index] = {_id: value};
+	});
+
+	var map = {};
+	[...allUsers, ...finishedUsers].map((item, index) => {
+		// if (!map[item._id] && index < allUsers.length) {
+		// 	map[item._id] = index;
+		// } else {
+		// 	delete map[item._id];
+		// }
+		map[item._id] = !map[item._id] && index < allUsers.length ? item : false
+	});
+	var ret = [];
+	Object.keys(map).filter(key => {
+		map[key] && ret.push(map[key]);
+	});
+
+	ctx.status = 200;
+	ctx.body = {
+		code: 0,
+		data: ret,
+		message: '第' + period + '期周报未填写的人员：' 
+	};
+
+	// TODO 就判断task状态、进度、备注、所属项目是否跟上期一致
 	// 如果一致，说明只是登录了，并没有更新任务，
-
 	//如果不一致，说明已经有任务进行了修改，算完成了周报
 };
 

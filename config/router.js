@@ -23,6 +23,7 @@ module.exports = function () {
 	router.post('/task/add', Task.addTask);
 	router.post('/task/edit', Task.updateTaskById);
 	router.post('/task/del', Task.delTask);
+	router.post('/task/unfinished', Task.unfinishedUsers);
 	router.post('/isFinished', Task.checkUnfinishTask);
 	router.post('/getTaskListByPeriod', Task.getTaskListByPeriod);
 	router.post('/export', Task.exportWeeklyReport);
