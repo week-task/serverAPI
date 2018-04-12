@@ -365,12 +365,12 @@ exports.unfinishedUsers = async (ctx, next) => {
 		// }
 		map[item._id] = !map[item._id] && index < allUsers.length ? item : false
 	});
-	var ret = [];
+	var ret = [], retUsers = [];
 	Object.keys(map).filter(key => {
-		map[key] && map[key].role > 0 && ret.push(map[key].name);
+		map[key] && map[key].role > 0 && map[key].status === 0 && ret.push(map[key].name);
 		// map[key] && retUsers.push(map[key]);
 
-		// if (map[key] && map[key].role > 0) {
+		// if (map[key] && map[key].role > 0 && map[key].status === 0) {
 		// 	retUsers.push(map[key]);
 		// 	ret.push(map[key].name);
 		// }
