@@ -367,14 +367,14 @@ exports.unfinishedUsers = async (ctx, next) => {
 	});
 	var ret = [];
 	Object.keys(map).filter(key => {
-		map[key] && ret.push(map[key]);
+		map[key] && ret.push(map[key].name);
 	});
 
 	ctx.status = 200;
 	ctx.body = {
 		code: 0,
 		data: ret,
-		message: '第' + period + '期周报未填写的人员：' 
+		message: '第' + period + '期周报未填写的人员：' + ret.join(', ')
 	};
 
 	// TODO 就判断task状态、进度、备注、所属项目是否跟上期一致

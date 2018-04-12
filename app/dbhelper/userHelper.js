@@ -108,7 +108,7 @@ const findUser = async (name) => {
 const addUser = async (user) => {
 	var res = {code: 0};
 	await user.save().then((user) => {
-		res = user;
+		res = {code: 0, user: user};
 	}).catch((err) => {
 		res = err;
 	});
