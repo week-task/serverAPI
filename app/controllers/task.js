@@ -367,7 +367,14 @@ exports.unfinishedUsers = async (ctx, next) => {
 	});
 	var ret = [];
 	Object.keys(map).filter(key => {
-		map[key] && ret.push(map[key].name);
+		map[key] && map[key].role > 0 && ret.push(map[key].name);
+		// map[key] && retUsers.push(map[key]);
+
+		// if (map[key] && map[key].role > 0) {
+		// 	retUsers.push(map[key]);
+		// 	ret.push(map[key].name);
+		// }
+
 	});
 
 	ctx.status = 200;
