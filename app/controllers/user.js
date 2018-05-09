@@ -348,6 +348,17 @@ exports.getUserList = async(ctx, next) => {
 				message: '获取成功'
 			}
 		}
+	} else if (type === 'teamUsers') {
+		userList = await userHelper.findUsersByTeam({team: team});
+		// console.log('userList,  ', userList);
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: userList,
+				message: '获取成功'
+			}
+		}
 	}
 };
 

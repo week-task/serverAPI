@@ -103,8 +103,8 @@ const findTaskByPeriod = async (params) => {
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
 
 	// role = -1是super管理员的情况, 根据不同的具体情况做定论，因为为-1的角色，不会直接展示所有的task，必然是根据不同的team和团队来进行展示的，也就是会传入不同的team，那-1这种情况就不必再重复
-	// if (uRole === -1) {} else 
-	if (uRole === 0) {//role = 0 是team管理员的情况,根据team
+	//role = 0 是team管理员的情况,根据team
+	//  if (uRole === 0) { // edit on 2018-05-09:v1.2.4 所有人都可以看到该team所有的项目情况
 		query = User.find({"team": params.team});
 		// 查出用户数组,方便查询相关任务
 		await query.exec((err, users) => {
@@ -122,29 +122,30 @@ const findTaskByPeriod = async (params) => {
 				res = tasks;
 			}
 		});
-	} else {
-		if (uRole === 1) { //如果是小组长,就通过parent来查找
-			query = User.find({"parent": params.userId});
-		} else { //如果是本人,就匹配名字
-			query = User.find({"name": params.userName});
-		}
-		// 查出用户数组,方便查询相关任务
-		await query.exec((err, users) => {
-			if (err) { res = []; }
-			else {
-				ausers = users;
-			}
-		});
-		//根据用户数组,可以分用户角色查询出不同的task列表,如果是小组长,查询出来的是他本人和他下面的组员所有信息
-		//如果是本人,就$in里面只有自己的信息,查询出来自己的相关列表
-		queryInner = Task.find({user:{$in:ausers}, period: params.period});
-		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
-			if (err2) {res = []}
-			else {
-				res = tasks;
-			}
-		});
-	}
+	// edit on 2018-05-09:v1.2.4 所有人都可以看到该team所有的项目情况
+	// } else {
+	// 	if (uRole === 1) { //如果是小组长,就通过parent来查找
+	// 		query = User.find({"parent": params.userId});
+	// 	} else { //如果是本人,就匹配名字
+	// 		query = User.find({"name": params.userName});
+	// 	}
+	// 	// 查出用户数组,方便查询相关任务
+	// 	await query.exec((err, users) => {
+	// 		if (err) { res = []; }
+	// 		else {
+	// 			ausers = users;
+	// 		}
+	// 	});
+	// 	//根据用户数组,可以分用户角色查询出不同的task列表,如果是小组长,查询出来的是他本人和他下面的组员所有信息
+	// 	//如果是本人,就$in里面只有自己的信息,查询出来自己的相关列表
+	// 	queryInner = Task.find({user:{$in:ausers}, period: params.period});
+	// 	await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
+	// 		if (err2) {res = []}
+	// 		else {
+	// 			res = tasks;
+	// 		}
+	// 	});
+	// }
 	return res;
 };
 
