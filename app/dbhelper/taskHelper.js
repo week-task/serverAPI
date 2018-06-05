@@ -108,7 +108,7 @@ const findTaskByPeriod = async (params) => {
 		query = User.find({"team": params.team});
 		// 查出用户数组,方便查询相关任务
 		await query.exec((err, users) => {
-			if (err) { res = []; }
+			if (err) { ausers = []; }
 			else {
 				ausers = users;
 			}
@@ -146,6 +146,41 @@ const findTaskByPeriod = async (params) => {
 	// 		}
 	// 	});
 	// }
+	return res;
+};
+
+/**
+ * 搜索关键字查询task
+ * @return {[type]} [description]
+ */
+const findTaskByKeyword = async (params) => {
+	var query, queryInner, ausers = [], res = [];
+	var keyword = new RegExp(params.keyword, 'i');
+	query = User.find({'team': params.team, $or:[{'name': keyword}]});
+	// 查出用户数组,方便查询相关任务
+	await query.exec((err, users) => {
+		if (err) { ausers = []; }
+		else {
+			ausers = users;
+		}
+	});
+
+	// console.log('ausers => ', ausers);
+	// console.log('params => ', params);
+	// if (ausers.length > 0) {
+	// 	queryInner = Task.find({user:{$in:ausers}, period: params.period});
+	// } else {
+	// 	queryInner = Task.find({$or:[{name: keyword}], period: params.period});
+	// }
+	
+	queryInner = Task.find({$or:[{name: keyword},{user:{$in:ausers}}], period: params.period});
+
+	await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
+		if (err2) {res = []}
+		else {
+			res = tasks;
+		}
+	});
 	return res;
 };
 
@@ -233,6 +268,7 @@ module.exports = {
 	findTaskByUser,
 	findTaskById,
 	findTaskByPeriod,
+	findTaskByKeyword,
 	isExistTask,
 	checkUnfinishTask,
 	finishedUsers,

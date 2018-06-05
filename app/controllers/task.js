@@ -150,6 +150,32 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 };
 
 /**
+ * 通过搜索关键字进行搜索
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.getTaskListByKeyword = async(ctx, next) => {
+	var period = xss(ctx.request.body.period);
+	var keyword = xss(ctx.request.body.keyword);
+	var team = xss(ctx.request.body.team);
+
+	var params = {
+		period: period,
+		keyword: keyword,
+		team: team
+	};
+	var data = await TaskHelper.findTaskByKeyword(params);
+	console.log('search list: => ', data);
+	var projects = renderProjects(data);
+	ctx.body = {
+		code: 0,
+		data: {res:projects, size: data.length},
+		message: '获取成功'
+	}
+};
+
+/**
  * 编辑任务
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]

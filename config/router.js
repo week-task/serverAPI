@@ -26,6 +26,7 @@ module.exports = function () {
 	router.post('/task/unfinished', Task.unfinishedUsers);
 	router.post('/isFinished', Task.checkUnfinishTask);
 	router.post('/getTaskListByPeriod', Task.getTaskListByPeriod);
+	router.post('/getTaskListByKeyword', Task.getTaskListByKeyword);
 	router.post('/export', Task.exportWeeklyReport);
 
 	// team 接口
