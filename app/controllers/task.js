@@ -150,6 +150,56 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 };
 
 /**
+ * 获取该期已修改任务列表
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.getTaskListByChanged = async(ctx, next) => {
+	var period = xss(ctx.request.body.period);
+	var userId = xss(ctx.request.body.userid);
+	var userName = xss(ctx.request.body.username);
+	var userRole = xss(ctx.request.body.userrole);
+	var team = xss(ctx.request.body.team);
+
+	var thisParams = {
+		period: period,
+		userId: userId,
+		userName: userName,
+		userRole: userRole,
+		team: team
+	};
+	var prevParams = {
+		period: parseInt(period) - 1,
+		userId: userId,
+		userName: userName,
+		userRole: userRole,
+		team: team
+	};
+	var thisData = await TaskHelper.findTaskByPeriod(thisParams);
+	var prevData = await TaskHelper.findTaskByPeriod(prevParams);
+	
+	thisData.map((item, index) => {
+		for (let i = 0, size = prevData.length; i < size; i++) {
+			let itemPrev = prevData[i];
+			if (item.name === itemPrev.name && item.user.name === itemPrev.user.name && parseInt(item.period) === parseInt(itemPrev.period) + 1) {
+				if (item.project.name === itemPrev.project.name && item.progress === itemPrev.progress && item.status === itemPrev.status && item.remark === itemPrev.remark) {
+					thisData.splice(index, 1);
+				}
+			}
+		}
+	});
+
+	var projects = renderProjects(thisData);
+	ctx.body = {
+		code: 0,
+		data: projects,
+		message: '获取成功'
+	}
+};
+
+
+/**
  * 通过搜索关键字进行搜索
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]
