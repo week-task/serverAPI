@@ -161,6 +161,7 @@ exports.getTaskListByChanged = async(ctx, next) => {
 	var userName = xss(ctx.request.body.username);
 	var userRole = xss(ctx.request.body.userrole);
 	var team = xss(ctx.request.body.team);
+	var keyword = xss(ctx.request.body.keyword);
 
 	var thisParams = {
 		period: period,
@@ -176,8 +177,27 @@ exports.getTaskListByChanged = async(ctx, next) => {
 		userRole: userRole,
 		team: team
 	};
-	var thisData = await TaskHelper.findTaskByPeriod(thisParams);
-	var prevData = await TaskHelper.findTaskByPeriod(prevParams);
+
+	var thisKeyword = {
+		period: period,
+		keyword: keyword,
+		team: team
+	};
+	var prevKeyword = {
+		period: parseInt(period) - 1,
+		keyword: keyword,
+		team: team
+	}
+
+	var thisData = undefined, prevData = undefined;
+
+	if (keyword === '') {
+		thisData = await TaskHelper.findTaskByPeriod(thisParams);
+		prevData = await TaskHelper.findTaskByPeriod(prevParams);
+	} else {
+		thisData = await TaskHelper.findTaskByKeyword(thisKeyword);
+		prevData = await TaskHelper.findTaskByKeyword(prevKeyword);
+	}
 	
 	thisData.map((item, index) => {
 		for (let i = 0, size = prevData.length; i < size; i++) {
