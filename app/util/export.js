@@ -1,6 +1,6 @@
 /**
  * 周报导出(better-xlsx)
- * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ * @author karl.luo<360512239@qq.com>
  * @Date 2018-03-06
  */
 const fs = require('fs');

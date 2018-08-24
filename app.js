@@ -1,6 +1,6 @@
 /**
  * APP程序主入口
- * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ * @author karl.luo<360512239@qq.com>
  * @Date 2018-03-01
  */
 'use strict';

@@ -1,6 +1,6 @@
 /**
  * 项目表接口controller
- * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ * @author karl.luo<360512239@qq.com>
  */
 'use strict';
 

@@ -1,6 +1,6 @@
 /**
  * koa-jwt拦截验证错误function
- * @author karl.luo<luolinjia@cmiot.chinamobile.com>
+ * @author karl.luo<360512239@qq.com>
  */
 const errorHandle = function (ctx, next) {
 	return next().catch(function (err) {
