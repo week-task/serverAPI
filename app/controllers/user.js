@@ -72,6 +72,9 @@ exports.login = async(ctx, next) => {
 		if (user.role === -1) {
 			teamInfo.name = '总监';
 			// var projects = await projectHelper.initOldVersionProject(user);
+		} else if (user.role === 0) {
+			// TODO update the task table 'year' field
+			teamInfo = await teamHelper.findTeam(user.team);
 		} else {
 			teamInfo = await teamHelper.findTeam(user.team);
 		}

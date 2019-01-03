@@ -65,7 +65,7 @@ const findTaskByUser = async (id) => {
  * @returns {Array}
  */
 const checkUnfinishTask = async (params) => {
-	var query = Task.find({period: parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId});
+	var query = Task.find({period: (parseInt(params.period) - 1) === 0 ? 53 : parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId, create_at:{$regex: (params.nowYear === '2018' || (parseInt(params.period) - 1 === 0)) ? /2018/i : /2019/i}}); //edited the year condition by karl on 2019-01-03
 	var res = [];
 	await query.exec((err, tasks) => {
 		if (err) {
@@ -83,7 +83,9 @@ const checkUnfinishTask = async (params) => {
  * @returns {Array}
  */
 const isExistTask = async (params) => {
-	var query = Task.find({name: params.name, period: params.period, user: params.userId});
+	// add the regex year on 2019-01-03
+	var regYear = new RegExp(params.nowYear, 'i');
+	var query = Task.find({name: params.name, period: params.period, user: params.userId, create_at: {$regex: regYear}});
 	var res = [];
 	await query.exec((err, tasks) => {
 		if (err) {
@@ -101,6 +103,7 @@ const isExistTask = async (params) => {
  */
 const findTaskByPeriod = async (params) => {
 	var query, queryInner, ausers = [], res = [], uRole = parseInt(params.userRole);
+	var regYear = new RegExp(params.year, 'i');
 
 	// role = -1是super管理员的情况, 根据不同的具体情况做定论，因为为-1的角色，不会直接展示所有的task，必然是根据不同的team和团队来进行展示的，也就是会传入不同的team，那-1这种情况就不必再重复
 	//role = 0 是team管理员的情况,根据team
@@ -115,13 +118,17 @@ const findTaskByPeriod = async (params) => {
 		});
 		// console.log('ausers => ', ausers);
 		// console.log('params => ', params);
-		queryInner = Task.find({user:{$in:ausers}, period: params.period});
+		// queryInner = Task.find({user:{$in:ausers}, period: params.period});
+
+		queryInner = Task.find({user:{$in:ausers}, period: params.period, create_at:{$regex: regYear}});
+		// queryInner = Task.find({name:{$regex:/来个/i}, period: params.period});
 		await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
 			if (err2) {res = []}
 			else {
 				res = tasks;
 			}
 		});
+		// console.log('reg res => ', res);
 	// edit on 2018-05-09:v1.2.4 所有人都可以看到该team所有的项目情况
 	// } else {
 	// 	if (uRole === 1) { //如果是小组长,就通过parent来查找
@@ -156,6 +163,7 @@ const findTaskByPeriod = async (params) => {
 const findTaskByKeyword = async (params) => {
 	var query, queryInner, ausers = [], res = [];
 	var keyword = new RegExp(params.keyword, 'i');
+	var regYear = new RegExp(params.year, 'i');
 	query = User.find({'team': params.team, $or:[{'name': keyword}]});
 	// 查出用户数组,方便查询相关任务
 	await query.exec((err, users) => {
@@ -173,7 +181,7 @@ const findTaskByKeyword = async (params) => {
 	// 	queryInner = Task.find({$or:[{name: keyword}], period: params.period});
 	// }
 	
-	queryInner = Task.find({$or:[{name: keyword},{user:{$in:ausers}}], period: params.period});
+	queryInner = Task.find({$or:[{name: keyword},{user:{$in:ausers}}], period: params.period, create_at:{$regex: regYear}});
 
 	await queryInner.populate('user', 'name').populate('project').exec((err2, tasks) => {
 		if (err2) {res = []}
@@ -192,6 +200,7 @@ const findTaskByKeyword = async (params) => {
 const finishedUsers = async (params) => {
 	var res, ausers = [];
 	var query = User.find({"team": params.team});
+	var regYear = new RegExp(params.year, 'i');
 	// 查出用户数组,方便查询相关任务
 	await query.exec((err, users) => {
 		if (err) { res = []; }
@@ -199,7 +208,7 @@ const finishedUsers = async (params) => {
 			ausers = users;
 		}
 	});
-	var queryInner = Task.find({user:{$in:ausers}, period: params.period});
+	var queryInner = Task.find({user:{$in:ausers}, period: params.period, create_at: {$regex: regYear}});
 	await queryInner.distinct('user').populate('user').populate('project').exec((err2, tasks) => {
 		if (err2) {res = []}
 		else {
@@ -262,6 +271,24 @@ const delTask = async (id) => {
 	return res;
 };
 
+
+/**
+ * 新增老版本的task表字段year
+ * @param {*} params String
+ * @return {[Task]}
+ */
+const initOldVersionTask = async (params) => {
+	var query = Task.update({},{$set: {year:2018}}, {multi: 1});
+	var res = [];
+	await query.exec((err, task) => {
+		if (err) {
+			res = [];
+		} else {
+			res = 'success';
+		}
+	});
+	return res;
+};
 
 module.exports = {
 	findAllTasks,

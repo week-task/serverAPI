@@ -70,12 +70,13 @@ exports.checkUnfinishTask = async(ctx, next) => {
 	var userId = xss(ctx.request.body.user_id);
 	var dataNo = 0;
 	var nowWeekOfYear = moment().format('w');
+	var nowYear = moment().format('gggg'); // added by karl on 2019-01-03
 
-	var preData = await TaskHelper.checkUnfinishTask({period: nowWeekOfYear, userId: userId});
+	var preData = await TaskHelper.checkUnfinishTask({year: nowYear, period: nowWeekOfYear, userId: userId}); // edited the params:year by karl on 2019-01-03
 	// for 循环一条一条对未完成的task列表进行检查
 	for (let i = 0, iSize = preData.length; i < iSize; i++) {
 		let item = preData[i];
-		let isExistTask = await TaskHelper.isExistTask({period: nowWeekOfYear, userId: userId, name: item.name});
+		let isExistTask = await TaskHelper.isExistTask({year: nowYear, period: nowWeekOfYear, userId: userId, name: item.name});// edited the params:year by karl on 2019-01-03
 		// 如果在最新的一期已经存在该任务,就不用管了,
 		if (isExistTask.length > 0) {
 			console.log('最新一期已存在该任务');
@@ -127,6 +128,7 @@ exports.checkUnfinishTask = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.getTaskListByPeriod = async(ctx, next) => {
+	var year = xss(ctx.request.body.year); // 新增字段year edit by karl on 2019-01-02
 	var period = xss(ctx.request.body.period);
 	var userId = xss(ctx.request.body.userid);
 	var userName = xss(ctx.request.body.username);
@@ -134,6 +136,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
 	var team = xss(ctx.request.body.team);
 
 	var params = {
+		year: year, // 新增字段year edit by karl on 2019-01-02
 		period: period,
 		userId: userId,
 		userName: userName,
@@ -156,6 +159,7 @@ exports.getTaskListByPeriod = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.getTaskListByChanged = async(ctx, next) => {
+	var year = xss(ctx.request.body.year); // added by karl on 2019-01-03
 	var period = xss(ctx.request.body.period);
 	var userId = xss(ctx.request.body.userid);
 	var userName = xss(ctx.request.body.username);
@@ -164,6 +168,7 @@ exports.getTaskListByChanged = async(ctx, next) => {
 	var keyword = xss(ctx.request.body.keyword);
 
 	var thisParams = {
+		year: year, // added by karl on 2019-01-03
 		period: period,
 		userId: userId,
 		userName: userName,
@@ -171,7 +176,8 @@ exports.getTaskListByChanged = async(ctx, next) => {
 		team: team
 	};
 	var prevParams = {
-		period: parseInt(period) - 1,
+		year: year, // added by karl on 2019-01-03
+		period: parseInt(period) - 1 === 0 ? 53 : parseInt(period) - 1,
 		userId: userId,
 		userName: userName,
 		userRole: userRole,
@@ -179,12 +185,14 @@ exports.getTaskListByChanged = async(ctx, next) => {
 	};
 
 	var thisKeyword = {
+		year: year, // added by karl on 2019-01-03
 		period: period,
 		keyword: keyword,
 		team: team
 	};
 	var prevKeyword = {
-		period: parseInt(period) - 1,
+		year: year, // added by karl on 2019-01-03
+		period: parseInt(period) - 1 === 0 ? 53 : parseInt(period) - 1,
 		keyword: keyword,
 		team: team
 	}
@@ -226,11 +234,13 @@ exports.getTaskListByChanged = async(ctx, next) => {
  * @return {[type]}        [description]
  */
 exports.getTaskListByKeyword = async(ctx, next) => {
+	var year = xss(ctx.request.body.year);
 	var period = xss(ctx.request.body.period);
 	var keyword = xss(ctx.request.body.keyword);
 	var team = xss(ctx.request.body.team);
 
 	var params = {
+		year: year, //added by karl on 2019-01-03
 		period: period,
 		keyword: keyword,
 		team: team
@@ -441,11 +451,12 @@ function renderProjects (data) {
 exports.unfinishedUsers = async (ctx, next) => {
 	var team = xss(ctx.request.body.team);
 	var period = xss(ctx.request.body.period);
+	var year = xss(ctx.request.body.year); // added by karl on 2019-01-03
 
 	// 首先查找出该team下的所有组员
 	var allUsers = await userHelper.findUsersByTeam({team: team});
 	// 根据period查询出该期task已经有哪些人已经填写过，然后这里要先判断是否存在新的任务，一旦有，说明填写过，如果没有，
-	var finishedUsers = await TaskHelper.finishedUsers({team: team, period: period});
+	var finishedUsers = await TaskHelper.finishedUsers({team: team, period: period, year: year});// edited by karl on 2019-01-03
 	// console.log('finishedUsers: ', finishedUsers);
 
 	finishedUsers.map((value, index, array) => {
@@ -477,7 +488,7 @@ exports.unfinishedUsers = async (ctx, next) => {
 	ctx.body = {
 		code: 0,
 		data: ret,
-		message: '第' + period + '期周报未填写的人员：' + ret.join(', ')
+		message: year + '年 第' + period + '期周报未填写的人员：' + ret.join(', ')
 	};
 
 	// TODO 就判断task状态、进度、备注、所属项目是否跟上期一致
@@ -492,14 +503,15 @@ exports.unfinishedUsers = async (ctx, next) => {
  */
 exports.exportWeeklyReport = async (ctx, next) => {
 
+	var year = xss(ctx.request.body.year); // added by karl on 2019-01-03
 	var period = xss(ctx.request.body.period);
 	var team = xss(ctx.request.body.team);
-	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period, team: team});
+	var preData = await TaskHelper.findTaskByPeriod({userRole: 0, period: period, team: team, year: year});
 	if (preData && preData.length === 0) {
 		ctx.status = 500;
 		ctx.body = {
 			code: -2,
-			message: '第' + period + '期周报暂无数据'
+			message: year + '年 第' + period + '期周报暂无数据'
 		};
 		return;
 	}
