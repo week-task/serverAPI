@@ -18,6 +18,7 @@ module.exports = function () {
 	router.post('/getUserList', User.getUserList);
 	router.post('/user/editpassword', User.changePassword);
 	router.post('/login', User.login);
+	router.post('/user/updateEnergy', User.updateEnergy4User);
 
 	// task 接口
 	router.post('/task/add', Task.addTask);

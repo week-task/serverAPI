@@ -71,6 +71,7 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
+			var initEnergy = await userHelper.addEnergyField4User();
 			// var projects = await projectHelper.initOldVersionProject(user);
 		} else if (user.role === 0) {
 			// TODO update the task table 'year' field
@@ -362,6 +363,17 @@ exports.getUserList = async(ctx, next) => {
 				message: '获取成功'
 			}
 		}
+	} else if (type === 'usersEnergy') {
+		userList = await userHelper.findUsersByTeam({team: team, energy: 'energy'});
+		console.log('userList by energy,  ', userList);
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: userList,
+				message: '获取成功'
+			}
+		}
 	}
 };
 
@@ -452,3 +464,24 @@ function renderUsersByTeams (data) {
 
 	return users;
 }
+
+/**
+ * 更新成员能量值
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.updateEnergy4User = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+	var userEnergy = xss(ctx.request.body.energy);
+
+	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: userEnergy});
+	if (updateUser) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: updateUser,
+			message: '修改能量值成功'
+		}
+	}
+};

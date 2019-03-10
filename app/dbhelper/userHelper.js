@@ -33,6 +33,8 @@ const findUsersByTeam = async (params) => {
 	var query;
 	if (params.role) {
 		query = User.find({team: params.team, role: params.role});
+	} else if (params.energy) {
+		query = User.find({team: params.team, role:{$in:[1,2]}});
 	} else {
 		query = User.find({team: params.team});
 	}
@@ -258,6 +260,41 @@ const updateUserParentSelf = async (params) => {
 	return res;
 }
 
+/**
+ * 新增老版本的用户字段energy（默认：100）
+ * @param {*} params String
+ * @return {[User]}
+ */
+const addEnergyField4User = async (params) => {
+	var query = User.update({},{$set: {energy:100}}, {multi: 1});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	return res;
+};
+
+/**
+ * 更新成员的能量值
+ * @param {*} params String
+ * @return {[User]}
+ */
+const updateEnergy4User = async (params) => {
+	var query = User.update({_id: params.userId}, {$set:{'energy': params.userEnergy}});
+	var res = null;
+	await query.exec(function(err, user) {
+		if(err) {
+			res = {}
+		}
+	});
+	res = await findUserById({id: params.userId});
+	return res;
+};
+
 module.exports = {
 	findAllUsers,
 	findUser,
@@ -271,5 +308,7 @@ module.exports = {
 	updatePrevPassword,
 	addStatus4User,
 	updateUserParentSelf,
-	findUsersByParent
+	findUsersByParent,
+	addEnergyField4User,
+	updateEnergy4User
 };
