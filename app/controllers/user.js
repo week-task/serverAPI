@@ -71,7 +71,7 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
-			var initEnergy = await userHelper.addEnergyField4User();
+			// var initEnergy = await userHelper.addEnergyField4User();
 			// var projects = await projectHelper.initOldVersionProject(user);
 		} else if (user.role === 0) {
 			// TODO update the task table 'year' field
@@ -329,6 +329,8 @@ exports.getUserList = async(ctx, next) => {
 	// TODO 这里需要几个判断条件，来判断需要返回的user list
 	var type = xss(ctx.request.body.type);
 	var team = xss(ctx.request.body.team);
+	var queue = xss(ctx.request.body.queue);
+	var parentId = xss(ctx.request.body.parentId);
 
 	var userList;
 	if (type === 'options') {
@@ -364,13 +366,16 @@ exports.getUserList = async(ctx, next) => {
 			}
 		}
 	} else if (type === 'usersEnergy') {
-		userList = await userHelper.findUsersByTeam({team: team, energy: 'energy'});
-		console.log('userList by energy,  ', userList);
+		userList = await userHelper.findUsersByTeam({team: team, energy: 'energy', parentId: parentId});
+		// console.log('userList by energy,  ', parentId);
+		// console.log('userList by energy,  ', userList);
+		// console.log('userList by energy format,  ', formatUserData(userList));
+		const formatUserList = formatUserData(userList);
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
 				code: 0,
-				data: userList,
+				data: formatUserList,
 				message: '获取成功'
 			}
 		}
@@ -466,6 +471,42 @@ function renderUsersByTeams (data) {
 }
 
 /**
+ * 从user表读出,封装成前端需要的user list
+ * @param data
+ * @returns {Array}
+ */
+function formatUserData(data) {
+	var reData = [];
+	for(var i = 0, size = data.length; i < size; i++) {
+		var item = data[i];
+		if (item.energy > 70 && item.energy <= 100) {
+			item['color'] = 'positive';
+		// } else if (item.energy > 60 && item.energy <= 80) {
+		// 	item['color'] = 'green-3';
+		} else if (item.energy > 40 && item.energy <= 70) {
+			item['color'] = 'warning';
+		// } else if (item.energy > 20 && item.energy <= 40) {
+		// 	item['color'] = 'red-3';
+		} else if (item.energy >= 0 && item.energy <= 40) {
+			item['color'] = 'negative';
+		}
+
+		reData.push({
+			color: item['color'],
+			_id: item._id,
+			energy: item.energy,
+			energy_desc: item.energy_desc,
+			name: item.name,
+			parent: item.parent,
+			role: item.role,
+			status: item.status,
+			team: item.team
+		});
+	}
+	return reData;
+}
+
+/**
  * 更新成员能量值
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
@@ -473,10 +514,11 @@ function renderUsersByTeams (data) {
  */
 exports.updateEnergy4User = async(ctx, next) => {
 	var userId = xss(ctx.request.body.id);
+	// 接收的是工作百分比，所以传入数据库，要用100 - energy
 	var userEnergy = xss(ctx.request.body.energy);
 	var userEnergyDesc = xss(ctx.request.body.energyDesc);
 
-	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: userEnergy, userEnergyDesc: userEnergyDesc});
+	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: 100 - parseInt(userEnergy), userEnergyDesc: userEnergyDesc});
 	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {

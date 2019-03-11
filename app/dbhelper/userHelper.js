@@ -32,9 +32,14 @@ const findAllUsers = async () => {
 const findUsersByTeam = async (params) => {
 	var query;
 	if (params.role) {
-		query = User.find({team: params.team, role: params.role});
+		query = User.find({team: params.team, role: params.role, status: 0});
 	} else if (params.energy) {
-		query = User.find({team: params.team, role:{$in:[1,2]}});
+		if (params.parentId) {
+			query = User.find({team: params.team, role:{$in:[1,2]}, status: 0, parent: params.parentId});
+		}else {
+			query = User.find({team: params.team, role:{$in:[1,2]}, status: 0});
+		}
+		
 	} else {
 		query = User.find({team: params.team});
 	}
