@@ -266,7 +266,7 @@ const updateUserParentSelf = async (params) => {
  * @return {[User]}
  */
 const addEnergyField4User = async (params) => {
-	var query = User.update({},{$set: {energy:100}}, {multi: 1});
+	var query = User.update({},{$set: {energy:100, energy_desc: ''}}, {multi: 1});
 	var res = [];
 	await query.exec((err, user) => {
 		if (err) {
@@ -284,7 +284,7 @@ const addEnergyField4User = async (params) => {
  * @return {[User]}
  */
 const updateEnergy4User = async (params) => {
-	var query = User.update({_id: params.userId}, {$set:{'energy': params.userEnergy}});
+	var query = User.update({_id: params.userId}, {$set:{'energy': params.userEnergy, 'energy_desc': params.userEnergyDesc}});
 	var res = null;
 	await query.exec(function(err, user) {
 		if(err) {

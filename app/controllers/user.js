@@ -474,8 +474,9 @@ function renderUsersByTeams (data) {
 exports.updateEnergy4User = async(ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 	var userEnergy = xss(ctx.request.body.energy);
+	var userEnergyDesc = xss(ctx.request.body.energyDesc);
 
-	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: userEnergy});
+	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: userEnergy, userEnergyDesc: userEnergyDesc});
 	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {
