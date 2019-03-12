@@ -24,9 +24,13 @@ var UserSchema = new Schema({
 	team: String,
 	status: Number, // 这个状态可以定义这个人是否还在职：0代表正常状态，1代表离职
 	energy: Number, // 总的energy默认为100，如果参与项目越多，energy值越少
-	energy_desc: String // 描述个人最近状态，由小leader填写
-	// create_at: Date,
-	// updated_at: Date
+	energy_desc: String, // 描述个人最近状态，由小leader填写
+	// create_at: String,
+	updated_at: String, // 最后更新时间 
+	avatar: String,  // 头像地址
+	motto: String,  // 签名、座右铭
+	tel: Number, // 电话
+	email: String // 邮件
 },{collection:'user'});
 
 /**

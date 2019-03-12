@@ -284,12 +284,30 @@ const addEnergyField4User = async (params) => {
 };
 
 /**
+ * 新增老版本的用户字段user updated_at, avatar, motto
+ * @param {*} params String
+ * @return {[User]}
+ */
+const addEnergyTimeField4User = async (params) => {
+	var query = User.update({},{$set: {updated_at:'', avatar: '', motto: '', tel: '', email: ''}}, {multi: 1});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	return res;
+};
+
+/**
  * 更新成员的能量值
  * @param {*} params String
  * @return {[User]}
  */
 const updateEnergy4User = async (params) => {
-	var query = User.update({_id: params.userId}, {$set:{'energy': params.userEnergy, 'energy_desc': params.userEnergyDesc}});
+	var query = User.update({_id: params.userId}, {$set:{'energy': params.userEnergy, 'energy_desc': params.userEnergyDesc, 'updated_at': params.updatedAt}});
 	var res = null;
 	await query.exec(function(err, user) {
 		if(err) {
@@ -315,5 +333,6 @@ module.exports = {
 	updateUserParentSelf,
 	findUsersByParent,
 	addEnergyField4User,
-	updateEnergy4User
+	updateEnergy4User,
+	addEnergyTimeField4User
 };

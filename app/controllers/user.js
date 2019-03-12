@@ -4,6 +4,7 @@
  */
 'use strict'
 
+var moment = require('moment')
 var xss = require('xss')
 var mongoose = require('mongoose')
 var bcrypt = require('bcryptjs')
@@ -71,6 +72,7 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
+			var initUserUpdated = await userHelper.addEnergyTimeField4User();
 			// var initEnergy = await userHelper.addEnergyField4User();
 			// var projects = await projectHelper.initOldVersionProject(user);
 		} else if (user.role === 0) {
@@ -500,7 +502,10 @@ function formatUserData(data) {
 			parent: item.parent,
 			role: item.role,
 			status: item.status,
-			team: item.team
+			team: item.team,
+			updated_at: item.updated_at,
+			avatar: item.avatar,
+			motto: item.motto
 		});
 	}
 	return reData;
@@ -518,7 +523,7 @@ exports.updateEnergy4User = async(ctx, next) => {
 	var userEnergy = xss(ctx.request.body.energy);
 	var userEnergyDesc = xss(ctx.request.body.energyDesc);
 
-	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: 100 - parseInt(userEnergy), userEnergyDesc: userEnergyDesc});
+	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: 100 - parseInt(userEnergy), userEnergyDesc: userEnergyDesc, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss")});
 	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {
