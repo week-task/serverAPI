@@ -505,7 +505,9 @@ function formatUserData(data) {
 			team: item.team,
 			updated_at: item.updated_at,
 			avatar: item.avatar,
-			motto: item.motto
+			motto: item.motto,
+			email: item.email,
+			tel: item.tel
 		});
 	}
 	return reData;
