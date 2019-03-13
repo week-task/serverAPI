@@ -72,7 +72,8 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
-			var initUserUpdated = await userHelper.addEnergyTimeField4User();
+			var initUserPRole = await userHelper.addUserPRoleField4User();
+			// var initUserUpdated = await userHelper.addEnergyTimeField4User();
 			// var initEnergy = await userHelper.addEnergyField4User();
 			// var projects = await projectHelper.initOldVersionProject(user);
 		} else if (user.role === 0) {
@@ -190,8 +191,9 @@ exports.editUser = async(ctx, next) => {
 	var role = xss(ctx.request.body.role);
 	var status = xss(ctx.request.body.status);
 	var team = xss(ctx.request.body.team);
+	var pRole = xss(ctx.request.body.pRole);
 
-	var updateUser = await userHelper.editUser({userId: userId, userName: userName, parent: parent, role: role, status: status});
+	var updateUser = await userHelper.editUser({userId: userId, userName: userName, parent: parent, role: role, status: status, pRole: pRole});
 	if (updateUser.code === 500) {
 		ctx.status = 500;
 		ctx.body = {
@@ -331,7 +333,7 @@ exports.getUserList = async(ctx, next) => {
 	// TODO 这里需要几个判断条件，来判断需要返回的user list
 	var type = xss(ctx.request.body.type);
 	var team = xss(ctx.request.body.team);
-	var queue = xss(ctx.request.body.queue);
+	// var queue = xss(ctx.request.body.queue);
 	var parentId = xss(ctx.request.body.parentId);
 
 	var userList;
@@ -363,15 +365,12 @@ exports.getUserList = async(ctx, next) => {
 			ctx.status = 200;
 			ctx.body = {
 				code: 0,
-				data: userList,
+				data: renderFlatUsersByTeams(userList),
 				message: '获取成功'
 			}
 		}
 	} else if (type === 'usersEnergy') {
 		userList = await userHelper.findUsersByTeam({team: team, energy: 'energy', parentId: parentId});
-		// console.log('userList by energy,  ', parentId);
-		// console.log('userList by energy,  ', userList);
-		// console.log('userList by energy format,  ', formatUserData(userList));
 		const formatUserList = formatUserData(userList);
 		if (userList) {
 			ctx.status = 200;
@@ -433,6 +432,10 @@ function renderUsersByTeams (data) {
 		1: '小组长',
 		2: '组员',
 	};
+	var pRoleZh = {
+		0: '成员',
+		1: '项目经理'
+	};
 
 	// get the relevant users
 	for (var i = 0, size = data.length; i < size; i++) {
@@ -461,13 +464,80 @@ function renderUsersByTeams (data) {
 					role: nItem.role,
 					roleZh: roleZh[nItem.role],
 					team: nItem.team,
-					parent: nItem.parent
+					parent: nItem.parent,
+					pRole: nItem.p_role,
+					pRoleZh: pRoleZh[nItem.p_role]
 				});
 			} 
 		}
 	}
 
 	sortByPid(users, 'uid');
+
+	return users;
+}
+
+/**
+ * 从user表读出,封装成前端需要的user list
+ * @param data
+ * @returns {Array}
+ */
+function renderFlatUsersByTeams (data) {
+	// 目标结构
+	var dataMock = [{
+		user: '人员扁平化',
+		selected: [],
+		data: [
+			{id: 1, name: '项目1'},
+			{id: 2, name: '项目2'},
+			{id: 3, name: '项目3'}
+		]
+	}];
+	
+	// 重新组装结构,使其能为前端服务
+	var users = [];
+	// var tempObj = {};
+	var statusZh = {
+		0: '在职',
+		1: '离职'
+	};
+	var roleZh = {
+		0: '团队负责人',
+		1: '小组长',
+		2: '组员',
+	};
+	var pRoleZh = {
+		0: '成员',
+		1: '项目经理'
+	};
+
+	// get the relevant users
+	
+	var formatOuter = {
+		user: '人员扁平化', 
+		selected: [],
+		data: []
+	};
+	users.push(formatOuter);
+
+	// 组装扁平化需要的数据
+	for (var i = 0, size = data.length; i < size; i++) {
+		var item = data[i];
+		users[0].data.push({
+			id: item._id,
+			name: item.name,
+			status: item.status,
+			statusZh: statusZh[item.status],
+			role: item.role,
+			roleZh: roleZh[item.role],
+			team: item.team,
+			parent: item.parent,
+			pRole: item.p_role,
+			pRoleZh: pRoleZh[item.p_role]
+		})
+	}
+	
+	sortByPid(users[0].data, 'id');
 
 	return users;
 }

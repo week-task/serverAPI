@@ -138,7 +138,8 @@ const editUser = async (params) => {
 		name:params.userName,
 		parent: params.parent,
 		role: params.role,
-		status: params.status
+		status: params.status,
+		p_role: params.pRole
 	}});
 	var res = [];
 	await query.exec((err, user) => {
@@ -302,6 +303,24 @@ const addEnergyTimeField4User = async (params) => {
 };
 
 /**
+ * 新增老版本的用户字段user p_role
+ * @param {*} params String
+ * @return {[User]}
+ */
+const addUserPRoleField4User = async (params) => {
+	var query = User.update({},{$set: {p_role: 0}}, {multi: 1});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	return res;
+};
+
+/**
  * 更新成员的能量值
  * @param {*} params String
  * @return {[User]}
@@ -334,5 +353,6 @@ module.exports = {
 	findUsersByParent,
 	addEnergyField4User,
 	updateEnergy4User,
-	addEnergyTimeField4User
+	addEnergyTimeField4User,
+	addUserPRoleField4User
 };

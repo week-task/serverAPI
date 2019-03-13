@@ -19,6 +19,7 @@ var UserSchema = new Schema({
 	password: String,
 	salt: String, // 存储password加密规则
 	role: Number,
+	p_role: Number, // 项目经理角色，0代表非项目经理，1代表项目经理
 	parent: String,
 	project: String,
 	team: String,
