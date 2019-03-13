@@ -88,7 +88,8 @@ exports.login = async(ctx, next) => {
 			name: user.name,
 			role: user.role,
 			team: user.team,
-			teamName: teamInfo.name
+			teamName: teamInfo.name,
+			pRole: user.p_role
 		};
 		
 		ctx.status = 200;
