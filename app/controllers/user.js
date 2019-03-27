@@ -227,7 +227,7 @@ exports.deleteUser = async(ctx, next) => {
 	// 如果角色为1的小组长，就不能被删除，可以通过关联任务设置为离职
 	// 如果角色为2的组员，只要没有关联的任务，均可以被物理删除
 	var task = await taskHelper.findTaskByUser(userId);
-	console.log(task);
+	// console.log(task);
 	if (task.length > 0) {
 		var offUser = await userHelper.deleteUser({id: userId, options: 'off'});
 		if (offUser.rescode === 0) {
@@ -381,6 +381,8 @@ exports.getUserList = async(ctx, next) => {
 				message: '获取成功'
 			}
 		}
+	} else if (type === 'pm') {
+		userList = await userHelper.findUsersByTeam({team: team, pm: 'pm'});
 	}
 };
 

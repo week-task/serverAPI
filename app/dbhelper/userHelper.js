@@ -40,6 +40,8 @@ const findUsersByTeam = async (params) => {
 			query = User.find({team: params.team, role:{$in:[1,2]}, status: 0});
 		}
 		
+	} else if (params.pm) {
+		query = User.find({team: params.team, p_role: 1, status: 0});
 	} else {
 		query = User.find({team: params.team});
 	}

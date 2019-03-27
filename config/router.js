@@ -5,6 +5,7 @@ const User = require('../app/controllers/user');
 const Project = require('../app/controllers/project');
 const Task = require('../app/controllers/task');
 const Team = require('../app/controllers/team');
+const Mtask = require('../app/controllers/mtask');
 
 module.exports = function () {
 	var router = new Router({
@@ -30,6 +31,11 @@ module.exports = function () {
 	router.post('/getTaskListByKeyword', Task.getTaskListByKeyword);
 	router.post('/getTaskListByChanged', Task.getTaskListByChanged);
 	router.post('/export', Task.exportWeeklyReport);
+
+	// mtask 接口
+	router.post('/mtask/add', Mtask.addMtask);
+	router.post('/mtask/edit', Mtask.editMtask);
+	router.post('/mtask/getMtaskList', Mtask.getMtaskList);
 
 	// team 接口
 	router.get('/getTeamList', Team.getTeamList);
