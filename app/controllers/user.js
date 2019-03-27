@@ -143,7 +143,15 @@ exports.addUser = async(ctx, next) => {
 		role: role,
 		status: status,
 		parent: parent,
-		team: team
+		team: team,
+		avatar: '',
+		email: '',
+		tel: 0,
+		motto: '',
+		energy: 100,
+		energy_desc: '',
+		updated_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+		p_role: 0
 	});
 
 	var user = new User(userObj);
@@ -564,6 +572,9 @@ function formatUserData(data) {
 		// 	item['color'] = 'red-3';
 		} else if (item.energy >= 0 && item.energy <= 40) {
 			item['color'] = 'negative';
+		} else if (item.energy == undefined) {
+			item['color'] = 'negative';
+			item.energy = 0;
 		}
 
 		reData.push({
