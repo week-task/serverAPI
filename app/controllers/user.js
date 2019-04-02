@@ -72,6 +72,8 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
+			var initUserIntroFrozenTime = await userHelper.addUserIntroFrozenTime();
+			var fixTheBMWName = await userHelper.changeBMWName();
 			// var initUserPRole = await userHelper.addUserPRoleField4User();
 			// var initUserUpdated = await userHelper.addEnergyTimeField4User();
 			// var initEnergy = await userHelper.addEnergyField4User();
@@ -223,6 +225,32 @@ exports.editUser = async(ctx, next) => {
 };
 
 /**
+ * 用户自己编辑
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.editUserInfo = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+	var motto = xss(ctx.request.body.motto);
+	var tel = xss(ctx.request.body.tel);
+	var email = xss(ctx.request.body.email);
+	var intro = xss(ctx.request.body.intro);
+	var team = xss(ctx.request.body.team);
+
+	var updateUser = await userHelper.editUserInfo({userId: userId, motto: motto, tel: tel, email: email, intro: intro});
+
+	if (updateUser) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: updateUser,
+			message: '更新资料成功'
+		}
+	}
+};
+
+/**
  * 离职或者删除用户
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
@@ -311,6 +339,25 @@ exports.changePassword = async(ctx, next) => {
 };
 
 /**
+ * 获取个人详情
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.getUserInfo = async(ctx, next) => {
+	var userId = xss(ctx.request.body.id);
+	var existUser = await userHelper.findUserById({id: userId});
+	if (existUser) {
+		ctx.status = 200;
+		ctx.body = {
+			code: 0,
+			data: existUser,
+			message: '获取用户成功'
+		}
+	}
+};
+
+/**
  * 重置密码
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
@@ -391,7 +438,28 @@ exports.getUserList = async(ctx, next) => {
 		}
 	} else if (type === 'pm') {
 		userList = await userHelper.findUsersByTeam({team: team, pm: 'pm'});
+	} else if (type === 'userShow') {
+		userList = await userHelper.findUsersByTeam({team: team, userShow: 'userShow'});
+		const formatUserInfoList = formatUserInfoData(userList);
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: formatUserInfoList,
+				message: '获取成功'
+			}
+		}
 	}
+};
+
+/**
+ * 获取用户信息列表
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.getUserInfoList = async(ctx, next) => {
+
 };
 
 /**
@@ -592,6 +660,47 @@ function formatUserData(data) {
 			motto: item.motto,
 			email: item.email,
 			tel: item.tel
+		});
+	}
+	return reData;
+}
+
+/**
+ * 从user表读出,封装成前端需要的user info list
+ * @param data
+ * @returns {Array}
+ */
+function formatUserInfoData(data) {
+	var reData = [];
+	for(var i = 0, size = data.length; i < size; i++) {
+		var item = data[i];
+		if (item.energy > 70 && item.energy <= 100) {
+			item['color'] = 'positive';
+			item['work_status'] = 'free...';
+		} else if (item.energy > 40 && item.energy <= 70) {
+			item['color'] = 'warning';
+			item['work_status'] = 'normal...';
+		} else if (item.energy >= 0 && item.energy <= 40) {
+			item['color'] = 'negative';
+			item['work_status'] = 'busy...';
+		} else if (item.energy == undefined) {
+			item['color'] = 'negative';
+			item['work_status'] = 'busy...';
+			item.energy = 0;
+		}
+		reData.push({
+			id: item._id,
+			avatar: item.avatar,
+			name: item.name,
+			motto: item.motto,
+			tel: item.tel,
+			email: item.email,
+			intro: item.intro,
+			energy: item.energy,
+			energy_desc: item.energy_desc,
+			color: item.color,
+			status: item.work_status,
+			role: item.role
 		});
 	}
 	return reData;

@@ -42,6 +42,8 @@ const findUsersByTeam = async (params) => {
 		
 	} else if (params.pm) {
 		query = User.find({team: params.team, p_role: 1, role:{$in:[1,2]}, status: 0});
+	} else if (params.userShow) {
+		query = User.find({team: params.team, role:{$in:[0,1,2]}, status: 0});
 	} else {
 		query = User.find({team: params.team});
 	}
@@ -155,6 +157,30 @@ const editUser = async (params) => {
 	if (params.role === '1') {
 		await updateUserParentSelf({id: params.userId});
 	}
+	
+	return res;
+};
+
+/**
+ * DIY个人资料
+ * @param {Object} params 
+ */
+const editUserInfo = async (params) => {
+
+	var query = User.update({_id: params.userId}, {$set:{
+		motto:params.motto,
+		tel: params.tel,
+		email: params.email,
+		intro: params.intro
+	}});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
 	
 	return res;
 };
@@ -323,6 +349,24 @@ const addUserPRoleField4User = async (params) => {
 };
 
 /**
+ * 新增老版本的用户字段intro, frozen_time, all_time
+ * @param {*} params String
+ * @return {[User]}
+ */
+const addUserIntroFrozenTime = async (params) => {
+	var query = User.update({},{$set: {intro: '', frozen_time: 0, all_time: 0}}, {multi: 1});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	return res;
+};
+
+/**
  * 更新成员的能量值
  * @param {*} params String
  * @return {[User]}
@@ -339,6 +383,25 @@ const updateEnergy4User = async (params) => {
 	return res;
 };
 
+/**
+ * 变更ADMIN=>李孟君
+ * @param {*} params String
+ * @return {[User]}
+ */
+const changeBMWName = async (params) => {
+	var query = User.update({name: 'admin'}, {$set:{'name': '李孟君'}});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	
+	return res;
+};
+
 module.exports = {
 	findAllUsers,
 	findUser,
@@ -346,6 +409,7 @@ module.exports = {
 	findUsersByTeam,
 	addUser,
 	editUser,
+	editUserInfo,
 	deleteUser,
 	bindTeam4User,
 	changePassword,
@@ -356,5 +420,7 @@ module.exports = {
 	addEnergyField4User,
 	updateEnergy4User,
 	addEnergyTimeField4User,
-	addUserPRoleField4User
+	addUserPRoleField4User,
+	addUserIntroFrozenTime,
+	changeBMWName
 };

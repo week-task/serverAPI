@@ -31,7 +31,10 @@ var UserSchema = new Schema({
 	avatar: String,  // 头像地址
 	motto: String,  // 签名、座右铭
 	tel: Number, // 电话
-	email: String // 邮件
+	email: String, // 邮件
+	intro: String, // 自我介绍
+	frozen_time: Number, // 冻结的请假时间
+	all_time: Number // 所有的请假时间
 },{collection:'user'});
 
 /**
