@@ -186,6 +186,27 @@ const editUserInfo = async (params) => {
 };
 
 /**
+ * 上传头像功能
+ * @param {Object} params 
+ */
+const editUserAvatar = async (params) => {
+
+	var query = User.update({_id: params.userId}, {$set:{
+		avatar: params.avatarUrl
+	}});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	
+	return res;
+};
+
+/**
  * 离职或删除用户
  * @param {Object} params 
  */
@@ -422,5 +443,6 @@ module.exports = {
 	addEnergyTimeField4User,
 	addUserPRoleField4User,
 	addUserIntroFrozenTime,
-	changeBMWName
+	changeBMWName,
+	editUserAvatar
 };

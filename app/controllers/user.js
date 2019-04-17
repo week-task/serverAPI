@@ -91,7 +91,8 @@ exports.login = async(ctx, next) => {
 			role: user.role,
 			team: user.team,
 			teamName: teamInfo.name,
-			pRole: user.p_role
+			pRole: user.p_role,
+			avatar:user.avatar
 		};
 		
 		ctx.status = 200;

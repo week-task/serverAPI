@@ -66,6 +66,7 @@ walk(models_path);
 // koa引入,其它常规模块的引入 =====================================================================>
 require('babel-register');
 const Koa = require('koa');
+const koaBody = require('koa-body');
 const logger = require('koa-logger');
 const session = require('koa-session');
 const bodyParser = require('koa-bodyparser');
@@ -78,6 +79,12 @@ const secret = require('./config/index').secret;
 app.use(errorHandle);
 // 加入koa-jwt token机制
 app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/]}));
+app.use(koaBody({
+	multipart: true,
+    formidable: {
+        maxFileSize: 200*1024*1024    // 设置上传文件大小最大限制，默认2M
+    }
+}));
 app.use(logger());
 app.use(session(app));
 app.use(require('koa-static')(__dirname + '/www/dist/spa-mat'));

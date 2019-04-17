@@ -6,11 +6,15 @@ const Project = require('../app/controllers/project');
 const Task = require('../app/controllers/task');
 const Team = require('../app/controllers/team');
 const Mtask = require('../app/controllers/mtask');
+const Upload = require('../app/controllers/upload');
 
 module.exports = function () {
 	var router = new Router({
 		prefix: '/weeklyreportapi'
 	});
+
+	router.post('/upload', Upload.upload);
+
 	// user 接口
 	router.post('/user/add', User.addUser);
 	router.post('/user/edit', User.editUser);
