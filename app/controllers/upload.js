@@ -24,7 +24,7 @@ import userHelper from '../dbhelper/userHelper'
 exports.upload = async(ctx, next) => {
     // console.log('ctx file => ', ctx);
     const devReqUrl = 'http://www.fileupload.com/v1/upload/upload';
-    const onlineReqUrl = 'http://upfile.inapi.ioteams.com';
+    const onlineReqUrl = 'http://upfile.inapi.ioteams.com/v1/upload/upload';
 
     // 上传单个文件
     const file = ctx.request.files.file; // 获取上传文件
@@ -56,20 +56,49 @@ exports.upload = async(ctx, next) => {
     //     console.log('img api res => ', res);
     // });
 
-    let avatarUrl = '';
+    let avatarUrl = '', isSuccess = true;
 
     await fetch(onlineReqUrl, {method: 'POST', body: form})
         .then((res)=> {
+            console.log('小文件upload请求res => ', res);
             return res.json();
         }).then((json)=> {
             json.data.path ? avatarUrl = json.data.path : '';
         }).catch((error) => {
+            isSuccess = false;
             console.log('error=>',error);
-            avatarUrl = 'error';
+            avatarUrl = 'statics/types/boy-avatar.jpg';
         })
 
         // console.log('userid ', ctx.state.user);
-    const userAvatar = await userHelper.editUserAvatar({userId: ctx.state.user.data._id, avatarUrl: avatarUrl});
+    if (isSuccess) {
+        const userAvatar = await userHelper.editUserAvatar({userId: ctx.state.user.data._id, avatarUrl: avatarUrl});
+        if(userAvatar) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 0,
+                data: {
+                    avatarUrl: avatarUrl
+                },
+                message: '新增成功'
+            }
+        } else {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                data: [],
+                message: 'failed'
+            }
+        }
+    } else {
+        ctx.status = 500;
+        ctx.body = {
+            code: 500,
+            data: [],
+            message: '上传失败'
+        }
+    }
+    
     // const formData1 = {
     //     upfile: reader,
     //     s:md5(`api_key=fe-weekreport|t=${fmtTime}6f0746407dc65b76e0480043abd41ef2`),
@@ -105,23 +134,7 @@ exports.upload = async(ctx, next) => {
 
     // form2.pipe(req);
     
-    if(userAvatar) {
-        ctx.status = 200;
-        ctx.body = {
-            code: 0,
-            data: {
-                avatarUrl: avatarUrl
-            },
-            message: '新增成功'
-        }
-    } else {
-        ctx.status = 500;
-        ctx.body = {
-            code: 500,
-            data: [],
-            message: 'failed'
-        }
-    }
+    
     
 
     // return ctx.body = "上传成功！";
