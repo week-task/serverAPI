@@ -72,8 +72,8 @@ exports.login = async(ctx, next) => {
 		var teamInfo = {};
 		if (user.role === -1) {
 			teamInfo.name = '总监';
-			var initUserIntroFrozenTime = await userHelper.addUserIntroFrozenTime();
-			var fixTheBMWName = await userHelper.changeBMWName();
+			// var initUserIntroFrozenTime = await userHelper.addUserIntroFrozenTime();
+			// var fixTheBMWName = await userHelper.changeBMWName();
 			// var initUserPRole = await userHelper.addUserPRoleField4User();
 			// var initUserUpdated = await userHelper.addEnergyTimeField4User();
 			// var initEnergy = await userHelper.addEnergyField4User();
