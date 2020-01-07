@@ -6,26 +6,57 @@
 'use strict';
 
 // 数据库连接配置 =====================================================================>
+// const mongoose = require('mongoose');
+// const MONGO_HOST = process.env.IOT_MONGO_HOST || 'localhost';
+// const mongoOptions = {
+// 	user: 'weektask',
+// 	pass: 'weektask_123'
+// };
+
+// const db = 'mongodb://tt:tt@111.229.235.175:27017/tt';// 连接本地mongoDB
+// // const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
+// // const db = 'mongodb://'+ MONGO_HOST +'/weekTask';// 连接线上mongoDB
+
+// mongoose.Promise = require('bluebird');
+// var dbInfo = mongoose.connect(db);
+// // var dbInfo = mongoose.connect(db, mongoOptions); //连接线上mongodb,有参数用户名和密码
+
+// dbInfo.connection.on('error', function (err) {
+// 	console.log('链接失败: ', err);
+// });
+// dbInfo.connection.on('open', function () {
+// 	console.log('数据库连接成功!');
+// });
+
+// 数据库连接配置 =====================================================================>
 const mongoose = require('mongoose');
 const MONGO_HOST = process.env.IOT_MONGO_HOST || 'localhost';
 const mongoOptions = {
-	user: 'weektask',
-	pass: 'weektask_123'
+	user: 'tt',
+	pass: 'tt'
 };
 
-const db = 'mongodb://localhost:27017/weekTask';// 连接本地mongoDB
+const db = 'mongodb://tt:tt@111.229.235.175:27017/tt';// 连接本地mongoDB
 // const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
 // const db = 'mongodb://'+ MONGO_HOST +'/weekTask';// 连接线上mongoDB
 
 mongoose.Promise = require('bluebird');
-var dbInfo = mongoose.connect(db);
-// var dbInfo = mongoose.connect(db, mongoOptions); //连接线上mongodb,有参数用户名和密码
+mongoose.set('useCreateIndex', true);
+var dbInfo = mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true});
+//var dbInfo = mongoose.connect(db, mongoOptions); //连接线上mongodb,有参数用户名和密码
 
-dbInfo.connection.on('error', function (err) {
+/*dbInfo.connection.on('error', function (err) {
 	console.log('链接失败: ', err);
 });
 dbInfo.connection.on('open', function () {
 	console.log('数据库连接成功!');
+});*/
+
+var dbConn = mongoose.connection;
+dbConn.on('error', console.error.bind(console, 'connection error:'));
+dbConn.once('open', function() {
+  // we're connected!
+	console.log('mongodb3.6.3 connected!');
 });
 
 
@@ -78,7 +109,9 @@ const secret = require('./config/index').secret;
 
 app.use(errorHandle);
 // 加入koa-jwt token机制
-app.use(jwt({secret,}).unless({path: [/\/login/, /\/export/]}));
+app.use(jwt({
+    secret: 'jwt_secret'
+}).unless({path: [/\/login/, /\/export/]}));
 app.use(koaBody({
 	multipart: true,
     formidable: {
