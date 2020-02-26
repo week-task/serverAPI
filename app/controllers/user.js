@@ -748,6 +748,7 @@ function formatUserOkrData (userData, kokrData, vokrData) {
 			status: item.work_status,
 			role: item.role,
       team: item.team,
+      parent: item.parent,
       kokrData: {},
       vokrData: {}
 		});

@@ -32,7 +32,7 @@ const findAllKokrs = async () => {
  * @return {[type]} [description]
  */
 const findKokrByUserId = async (params) => {
-  var query = Kokr.find({ creator: params.userId, year: params.year, month: params.month, team: params.team });
+  var query = Kokr.find({ creator: params.creator, year: params.year, month: params.month, team: params.team });
   var res = [];
   await query.exec(function (err, kokr) {
     if (err) {

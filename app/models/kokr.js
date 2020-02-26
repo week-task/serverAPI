@@ -16,7 +16,7 @@ var KokrSchema = new Schema({
 	content: [
 		{
 			kind: String,
-			percent: String,
+			percent: Number,
 			title: String,
 			desc: String
 			// score: Number

@@ -19,26 +19,17 @@ import kokrHelper from '../dbhelper/kokrHelper';
  * @return {[type]}        [description]
  */
 exports.addKokr = async (ctx, next) => {
-  var userId = xss(ctx.request.body.userId);
+  var creator = xss(ctx.request.body.creator);
   var team = xss(ctx.request.body.team);
+  var year = xss(ctx.request.body.year);
+  var month = xss(ctx.request.body.month);
   var content = ctx.request.body.content;
 
-  var kokr = new Kokr({
-    _id: new mongoose.Types.ObjectId(),
-    creator: userId,
-    team: team,
-    year: moment().year(),
-    month: parseInt(moment().month()) + 1,
-    content: content,
-    create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
-    update_at: moment().format("YYYY-MM-DD HH:mm:ss")
-  });
-
   var params = {
-    userId: userId,
+    creator: creator,
     team: team,
-    year: moment().year(),
-    month: moment().month()
+    year: year,
+    month: month
   }
 
   var data = await kokrHelper.findKokrByUserId(params);
@@ -53,6 +44,16 @@ exports.addKokr = async (ctx, next) => {
     }
     res = await kokrHelper.editKokr(editKokr);
   } else {
+    var kokr = new Kokr({
+      _id: new mongoose.Types.ObjectId(),
+      creator: creator,
+      team: team,
+      year: year,
+      month: month,
+      content: content,
+      create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+      update_at: moment().format("YYYY-MM-DD HH:mm:ss")
+    });
     res = await kokrHelper.addKokr(kokr);
   }
 
@@ -68,19 +69,19 @@ exports.addKokr = async (ctx, next) => {
 };
 
 /**
- * 根据userId、year和month查询kokr
+ * 根据creator、year和month查询kokr
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
 exports.getOkrByUserId = async (ctx, next) => {
-  var userId = xss(ctx.request.body.userId);
+  var creator = xss(ctx.request.body.creator);
   var year = xss(ctx.request.body.year);
   var month = xss(ctx.request.body.month);
   var team = xss(ctx.request.body.team);
 
   var params = {
-    userId: userId,
+    creator: creator,
     year: year,
     month: month,
     team: team

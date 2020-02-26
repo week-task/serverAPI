@@ -31,7 +31,7 @@ const findAllVokrs = async () => {
  * @return {[type]} [description]
  */
 const findVokrByUserId = async (params) => {
-  var query = Vokr.find({ creator: params.userId, year: params.year, month: params.month, team: params.team });
+  var query = Vokr.find({ creator: params.creator, year: params.year, month: params.month, team: params.team });
   var res = [];
   await query.exec(function (err, vokr) {
     if (err) {
@@ -60,10 +60,42 @@ const findVokrByYearMonth = async (params) => {
   return res;
 };
 
+/**
+ * 增加vokr
+ * @param  {[Task]} vokr [mongoose.model('Task')]
+ * @return {[type]}      [description]
+ */
+const addVokr = async (vokr) => {
+  vokr = await vokr.save();
+  return vokr;
+};
+
+const editVokr = async (params) => {
+  var query = Vokr.findByIdAndUpdate(params.id, {
+    dealer: params.dealer,
+    gscore: params.gscore,
+    status: params.status,
+    comment: params.comment,
+    last_person: params.last_person,
+    content: params.content,
+    update_at: params.update_at
+  });
+  var res = [];
+  await query.exec((err, vokr) => {
+    if (err) {
+      res = [];
+    } else {
+      res = vokr;
+    }
+  });
+  return res;
+};
 
 
 module.exports = {
 	findAllVokrs,
   findVokrByUserId,
-  findVokrByYearMonth
+  findVokrByYearMonth,
+  addVokr,
+  editVokr
 };
