@@ -6,6 +6,7 @@ const Project = require('../app/controllers/project');
 const Task = require('../app/controllers/task');
 const Team = require('../app/controllers/team');
 const Mtask = require('../app/controllers/mtask');
+const Kokr = require('../app/controllers/kokr');
 const Upload = require('../app/controllers/upload');
 
 module.exports = function () {
@@ -58,6 +59,10 @@ module.exports = function () {
 	router.post('/project/launch', Project.launchProject);
 	router.post('/project/edit', Project.editProject);
 	router.post('/project/delete', Project.deleteProject);
+
+	// kokr 接口
+	router.post('/kokr/add', Kokr.addKokr);
+  router.post('/kokr/getOkrByUserId', Kokr.getOkrByUserId);
 
 	return router;
 }

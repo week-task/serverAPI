@@ -14,7 +14,9 @@ import userHelper from '../dbhelper/userHelper'
 import teamHelper from '../dbhelper/teamHelper'
 import projectHelper from '../dbhelper/projectHelper'
 import taskHelper from '../dbhelper/taskHelper'
-import {secret} from '../../config/index'
+import kokrHelper from '../dbhelper/kokrHelper'
+import vokrHelper from '../dbhelper/vokrHelper'
+import { secret } from '../../config/index'
 
 /**
  * 登录逻辑
@@ -22,7 +24,7 @@ import {secret} from '../../config/index'
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.login = async(ctx, next) => {
+exports.login = async (ctx, next) => {
 	var userName = xss(ctx.request.body.username);
 	var password = xss(ctx.request.body.password);
 
@@ -36,14 +38,14 @@ exports.login = async(ctx, next) => {
 	}
 
 	var user = await userHelper.findUser(userName);
-	if(!user) {
+	if (!user) {
 		ctx.status = 401;
 		ctx.body = {
 			code: -1,
 			message: '根本就没这个人'
 		};
 		return;
-	} 
+	}
 
 	if (user.status && user.status === 1) {
 		ctx.status = 401;
@@ -53,7 +55,7 @@ exports.login = async(ctx, next) => {
 		};
 		return;
 	}
-	
+
 	if (user.status === null || user.status === undefined) {
 		await userHelper.addStatus4User(user._id);
 	}
@@ -62,7 +64,7 @@ exports.login = async(ctx, next) => {
 		// 如果用户的密码是111，说明是v1.0.0版本的用户，此时要用salt重新加一次密，并存入salt
 		var prevSalt = bcrypt.genSaltSync(10);
 		var prevPassword = bcrypt.hashSync(user.password, prevSalt);
-		user = await userHelper.updatePrevPassword({user: user, salt: prevSalt, password: prevPassword});
+		user = await userHelper.updatePrevPassword({ user: user, salt: prevSalt, password: prevPassword });
 	}
 
 	var salt = user.salt;
@@ -92,9 +94,9 @@ exports.login = async(ctx, next) => {
 			team: user.team,
 			teamName: teamInfo.name,
 			pRole: user.p_role,
-			avatar:user.avatar
+			avatar: user.avatar
 		};
-		
+
 		ctx.status = 200;
 		ctx.body = {
 			code: 0,
@@ -103,7 +105,7 @@ exports.login = async(ctx, next) => {
 				token: jsonwebtoken.sign({
 					data: userInfo,
 					exp: Math.floor(Date.now() / 1000) + (60 * 60 * 15) // 60 seconds * 60 minutes * 3 = 3 hour
-				}, secret)
+				}, secret) + 'z|' + user.role
 			},
 			message: '登录成功!'
 		};
@@ -125,7 +127,7 @@ exports.login = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.addUser = async(ctx, next) => {
+exports.addUser = async (ctx, next) => {
 	var userName = xss(ctx.request.body.name);
 	// var password = xss(ctx.request.body.password);
 	var project = xss(ctx.request.body.project);
@@ -133,7 +135,7 @@ exports.addUser = async(ctx, next) => {
 	var role = xss(ctx.request.body.role);
 	var status = xss(ctx.request.body.status);
 	var team = xss(ctx.request.body.team);
-	
+
 	// 对密码进行加密
 	var salt = bcrypt.genSaltSync(10);
 	var hashPassword = bcrypt.hashSync('111', salt);
@@ -168,9 +170,9 @@ exports.addUser = async(ctx, next) => {
 		};
 		return;
 	}
-	
+
 	if (newUser && newUser.role === 1) {
-		var changeUser = await userHelper.updateUserParentSelf({id: newUser._id});
+		var changeUser = await userHelper.updateUserParentSelf({ id: newUser._id });
 		// console.log('changeUser ', changeUser);
 		if (!changeUser) {
 			ctx.status = 500;
@@ -196,7 +198,7 @@ exports.addUser = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.editUser = async(ctx, next) => {
+exports.editUser = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 	var userName = xss(ctx.request.body.name);
 	var parent = xss(ctx.request.body.parent);
@@ -205,7 +207,7 @@ exports.editUser = async(ctx, next) => {
 	var team = xss(ctx.request.body.team);
 	var pRole = xss(ctx.request.body.pRole);
 
-	var updateUser = await userHelper.editUser({userId: userId, userName: userName, parent: parent, role: role, status: status, pRole: pRole});
+	var updateUser = await userHelper.editUser({ userId: userId, userName: userName, parent: parent, role: role, status: status, pRole: pRole });
 	if (updateUser.code === 500) {
 		ctx.status = 500;
 		ctx.body = {
@@ -214,7 +216,7 @@ exports.editUser = async(ctx, next) => {
 			message: '该小组长还存在组员，不可以变更角色！'
 		};
 		return;
-	} 
+	}
 	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {
@@ -231,7 +233,7 @@ exports.editUser = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.editUserInfo = async(ctx, next) => {
+exports.editUserInfo = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 	var motto = xss(ctx.request.body.motto);
 	var tel = xss(ctx.request.body.tel);
@@ -239,7 +241,7 @@ exports.editUserInfo = async(ctx, next) => {
 	var intro = xss(ctx.request.body.intro);
 	var team = xss(ctx.request.body.team);
 
-	var updateUser = await userHelper.editUserInfo({userId: userId, motto: motto, tel: tel, email: email, intro: intro});
+	var updateUser = await userHelper.editUserInfo({ userId: userId, motto: motto, tel: tel, email: email, intro: intro });
 
 	if (updateUser) {
 		ctx.status = 200;
@@ -257,7 +259,7 @@ exports.editUserInfo = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.deleteUser = async(ctx, next) => {
+exports.deleteUser = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 
 	// 如果是有关联的相关任务，就只能设置为离职状态
@@ -266,7 +268,7 @@ exports.deleteUser = async(ctx, next) => {
 	var task = await taskHelper.findTaskByUser(userId);
 	// console.log(task);
 	if (task.length > 0) {
-		var offUser = await userHelper.deleteUser({id: userId, options: 'off'});
+		var offUser = await userHelper.deleteUser({ id: userId, options: 'off' });
 		if (offUser.rescode === 0) {
 			ctx.status = 500;
 			ctx.body = {
@@ -278,8 +280,8 @@ exports.deleteUser = async(ctx, next) => {
 		}
 	}
 
-	var relevantUser = await userHelper.findUserById({id: userId});
-	var parentUser = await userHelper.findUsersByParent({parent: userId});
+	var relevantUser = await userHelper.findUserById({ id: userId });
+	var parentUser = await userHelper.findUsersByParent({ parent: userId });
 
 	if (relevantUser.role === 1 && parentUser.length > 1) {
 		ctx.status = 500;
@@ -291,7 +293,7 @@ exports.deleteUser = async(ctx, next) => {
 		return;
 	}
 
-	var user = await userHelper.deleteUser({id: userId, options: 'on'});
+	var user = await userHelper.deleteUser({ id: userId, options: 'on' });
 	if (user.rescode === 1) {
 		ctx.status = 200;
 		ctx.body = {
@@ -308,11 +310,11 @@ exports.deleteUser = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.changePassword = async(ctx, next) => {
+exports.changePassword = async (ctx, next) => {
 	var userId = xss(ctx.request.body.userId);
 	var password = xss(ctx.request.body.password);
 	var oldPassword = xss(ctx.request.body.oldPassword);
-	var user = await userHelper.findUserById({id:userId});
+	var user = await userHelper.findUserById({ id: userId });
 	var salt = user.salt;
 
 	var oldHashPassword = bcrypt.hashSync(oldPassword, salt);
@@ -328,7 +330,7 @@ exports.changePassword = async(ctx, next) => {
 	}
 
 	var hashPassword = bcrypt.hashSync(password, salt);
-	var passUser = await userHelper.changePassword({userId: userId, password: hashPassword});
+	var passUser = await userHelper.changePassword({ userId: userId, password: hashPassword });
 	if (passUser) {
 		ctx.status = 200;
 		ctx.body = {
@@ -345,9 +347,9 @@ exports.changePassword = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.getUserInfo = async(ctx, next) => {
+exports.getUserInfo = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
-	var existUser = await userHelper.findUserById({id: userId});
+	var existUser = await userHelper.findUserById({ id: userId });
 	if (existUser) {
 		ctx.status = 200;
 		ctx.body = {
@@ -364,12 +366,12 @@ exports.getUserInfo = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.resetPass = async(ctx, next) => {
+exports.resetPass = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 
-	var existUser = await userHelper.findUserById({id: userId});
+	var existUser = await userHelper.findUserById({ id: userId });
 	var resetpass = bcrypt.hashSync('111', existUser.salt);
-	var resetPassUser = await userHelper.changePassword({userId: userId, password: resetpass});
+	var resetPassUser = await userHelper.changePassword({ userId: userId, password: resetpass });
 	if (resetPassUser) {
 		ctx.status = 200;
 		ctx.body = {
@@ -386,7 +388,7 @@ exports.resetPass = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.getUserList = async(ctx, next) => {
+exports.getUserList = async (ctx, next) => {
 	// TODO 这里需要几个判断条件，来判断需要返回的user list
 	var type = xss(ctx.request.body.type);
 	var team = xss(ctx.request.body.team);
@@ -395,7 +397,7 @@ exports.getUserList = async(ctx, next) => {
 
 	var userList;
 	if (type === 'options') {
-		userList = await userHelper.findUsersByTeam({team: team, role: 1});
+		userList = await userHelper.findUsersByTeam({ team: team, role: 1 });
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
@@ -404,8 +406,8 @@ exports.getUserList = async(ctx, next) => {
 				message: '获取成功'
 			};
 		}
-	} else if (type ==='all') {
-		userList = await userHelper.findUsersByTeam({team: team});
+	} else if (type === 'all') {
+		userList = await userHelper.findUsersByTeam({ team: team });
 		// console.log('userList,  ', userList);
 		if (userList) {
 			ctx.status = 200;
@@ -416,7 +418,7 @@ exports.getUserList = async(ctx, next) => {
 			}
 		}
 	} else if (type === 'teamUsers') {
-		userList = await userHelper.findUsersByTeam({team: team});
+		userList = await userHelper.findUsersByTeam({ team: team });
 		// console.log('userList,  ', userList);
 		if (userList) {
 			ctx.status = 200;
@@ -427,7 +429,7 @@ exports.getUserList = async(ctx, next) => {
 			}
 		}
 	} else if (type === 'usersEnergy') {
-		userList = await userHelper.findUsersByTeam({team: team, energy: 'energy', parentId: parentId});
+		userList = await userHelper.findUsersByTeam({ team: team, energy: 'energy', parentId: parentId });
 		const formatUserList = formatUserData(userList);
 		if (userList) {
 			ctx.status = 200;
@@ -438,15 +440,31 @@ exports.getUserList = async(ctx, next) => {
 			}
 		}
 	} else if (type === 'pm') {
-		userList = await userHelper.findUsersByTeam({team: team, pm: 'pm'});
+		userList = await userHelper.findUsersByTeam({ team: team, pm: 'pm' });
 	} else if (type === 'userShow') {
-		userList = await userHelper.findUsersByTeam({team: team, userShow: 'userShow'});
+		userList = await userHelper.findUsersByTeam({ team: team, userShow: 'userShow' });
 		const formatUserInfoList = formatUserInfoData(userList);
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
 				code: 0,
 				data: formatUserInfoList,
+				message: '获取成功'
+			}
+		}
+	} else if (type = 'okr') { // added by karl on 2020-02-25 新增一个类型OKR
+		var year = xss(ctx.request.body.year);
+		var month = xss(ctx.request.body.month);
+		var kokrList, vokrList;
+		userList = await userHelper.findUsersByTeam({ team: team, okr: 'okr' });
+		kokrList = await kokrHelper.findKokrByYearMonth({ team: team, year: year, month: month });
+		vokrList = await vokrHelper.findVokrByYearMonth({ team: team, year: year, month: month });
+		const formatUserOkrList = formatUserOkrData(userList, kokrList, vokrList);
+		if (userList) {
+			ctx.status = 200;
+			ctx.body = {
+				code: 0,
+				data: formatUserOkrList,
 				message: '获取成功'
 			}
 		}
@@ -459,7 +477,7 @@ exports.getUserList = async(ctx, next) => {
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.getUserInfoList = async(ctx, next) => {
+exports.getUserInfoList = async (ctx, next) => {
 
 };
 
@@ -469,7 +487,7 @@ exports.getUserInfoList = async(ctx, next) => {
  * @param field
  * @returns {Query|Array.<T>|*|Aggregate}
  */
-function sortByPid(objArr, field) {
+function sortByPid (objArr, field) {
 
 	// 指定排序的比较函数
 	const compare = (property) => {
@@ -494,12 +512,12 @@ function renderUsersByTeams (data) {
 		user: '**小组长',
 		selected: [],
 		data: [
-			{id: 1, name: '项目1'},
-			{id: 2, name: '项目2'},
-			{id: 3, name: '项目3'}
+			{ id: 1, name: '项目1' },
+			{ id: 2, name: '项目2' },
+			{ id: 3, name: '项目3' }
 		]
 	}];
-	
+
 	// 重新组装结构,使其能为前端服务
 	var users = [];
 	// var tempObj = {};
@@ -522,7 +540,7 @@ function renderUsersByTeams (data) {
 		if (data[i].role === 1) {
 			var item = {
 				uid: data[i]._id,
-				user: data[i].name, 
+				user: data[i].name,
 				selected: [],
 				data: []
 			};
@@ -548,7 +566,7 @@ function renderUsersByTeams (data) {
 					pRole: nItem.p_role,
 					pRoleZh: pRoleZh[nItem.p_role]
 				});
-			} 
+			}
 		}
 	}
 
@@ -568,12 +586,12 @@ function renderFlatUsersByTeams (data) {
 		user: '人员扁平化',
 		selected: [],
 		data: [
-			{id: 1, name: '项目1'},
-			{id: 2, name: '项目2'},
-			{id: 3, name: '项目3'}
+			{ id: 1, name: '项目1' },
+			{ id: 2, name: '项目2' },
+			{ id: 3, name: '项目3' }
 		]
 	}];
-	
+
 	// 重新组装结构,使其能为前端服务
 	var users = [];
 	// var tempObj = {};
@@ -592,9 +610,9 @@ function renderFlatUsersByTeams (data) {
 	};
 
 	// get the relevant users
-	
+
 	var formatOuter = {
-		user: '人员扁平化', 
+		user: '人员扁平化',
 		selected: [],
 		data: []
 	};
@@ -616,7 +634,7 @@ function renderFlatUsersByTeams (data) {
 			pRoleZh: pRoleZh[item.p_role]
 		})
 	}
-	
+
 	sortByPid(users[0].data, 'id');
 
 	return users;
@@ -627,18 +645,18 @@ function renderFlatUsersByTeams (data) {
  * @param data
  * @returns {Array}
  */
-function formatUserData(data) {
+function formatUserData (data) {
 	var reData = [];
-	for(var i = 0, size = data.length; i < size; i++) {
+	for (var i = 0, size = data.length; i < size; i++) {
 		var item = data[i];
 		if (item.energy > 70 && item.energy <= 100) {
 			item['color'] = 'positive';
-		// } else if (item.energy > 60 && item.energy <= 80) {
-		// 	item['color'] = 'green-3';
+			// } else if (item.energy > 60 && item.energy <= 80) {
+			// 	item['color'] = 'green-3';
 		} else if (item.energy > 40 && item.energy <= 70) {
 			item['color'] = 'warning';
-		// } else if (item.energy > 20 && item.energy <= 40) {
-		// 	item['color'] = 'red-3';
+			// } else if (item.energy > 20 && item.energy <= 40) {
+			// 	item['color'] = 'red-3';
 		} else if (item.energy >= 0 && item.energy <= 40) {
 			item['color'] = 'negative';
 		} else if (item.energy == undefined) {
@@ -671,9 +689,9 @@ function formatUserData(data) {
  * @param data
  * @returns {Array}
  */
-function formatUserInfoData(data) {
+function formatUserInfoData (data) {
 	var reData = [];
-	for(var i = 0, size = data.length; i < size; i++) {
+	for (var i = 0, size = data.length; i < size; i++) {
 		var item = data[i];
 		if (item.energy > 70 && item.energy <= 100) {
 			item['color'] = 'positive';
@@ -708,18 +726,66 @@ function formatUserInfoData(data) {
 }
 
 /**
+ * 从user表读出,封装成前端需要的user okr list
+ * @param data
+ * @returns {Array}
+ */
+function formatUserOkrData (userData, kokrData, vokrData) {
+	var reData = [];
+
+	for (var i = 0, size = userData.length; i < size; i++) {
+		var item = userData[i];
+		reData.push({
+			id: item._id,
+			avatar: item.avatar,
+			name: item.name,
+			motto: item.motto,
+			tel: item.tel,
+			email: item.email,
+			intro: item.intro,
+			energy: item.energy,
+			energy_desc: item.energy_desc,
+			status: item.work_status,
+			role: item.role,
+      team: item.team,
+      kokrData: {},
+      vokrData: {}
+		});
+	}
+	if (!kokrData || kokrData.length <= 0) {
+		return reData;
+	}
+	for (var m = 0, sizeM = reData.length; m < sizeM; m++) {
+		var itemM = reData[m];
+		for (var j = 0, sizeJ = kokrData.length; j < sizeJ; j++) {
+			var itemJ = kokrData[j];
+			if (itemM.id.toString() === itemJ.creator.toString()) {
+				reData[m]['kokrData'] = itemJ;
+			}
+		}
+    for (var k = 0, sizeK = vokrData.length; k < sizeK; k++) {
+      var itemK = vokrData[j];
+      if (itemM.id.toString() === itemK.creator.toString()) {
+        reData[m]['vokrData'] = itemK;
+      }
+    }
+	}
+	return reData;
+}
+
+/**
  * 更新成员能量值
  * @param {[type]}   ctx   [description]
  * @param {Function} next  [description]
  * @yield {[type]}         [description]
  */
-exports.updateEnergy4User = async(ctx, next) => {
+exports.updateEnergy4User = async (ctx, next) => {
 	var userId = xss(ctx.request.body.id);
 	// 接收的是工作百分比，所以传入数据库，要用100 - energy
 	var userEnergy = xss(ctx.request.body.energy);
 	var userEnergyDesc = xss(ctx.request.body.energyDesc);
 
-	var updateUser = await userHelper.updateEnergy4User({userId: userId, userEnergy: 100 - parseInt(userEnergy), userEnergyDesc: userEnergyDesc, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss")});
+	var updateUser = await userHelper.updateEnergy4User({ userId: userId, userEnergy: 100 - parseInt(userEnergy), userEnergyDesc: userEnergyDesc, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss") });
 	if (updateUser) {
 		ctx.status = 200;
 		ctx.body = {

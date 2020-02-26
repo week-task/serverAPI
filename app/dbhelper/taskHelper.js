@@ -65,7 +65,8 @@ const findTaskByUser = async (id) => {
  * @returns {Array}
  */
 const checkUnfinishTask = async (params) => {
-	var query = Task.find({period: (parseInt(params.period) - 1) === 0 ? 53 : parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId, create_at:{$regex: (params.nowYear === '2018' || (parseInt(params.period) - 1 === 0)) ? /2018/i : /2019/i}}); //edited the year condition by karl on 2019-01-03
+	// edit the /2020/i value for 2020 by karl.luo on 2020-02-06 这里$regex的正则只能是固定的年份
+	var query = Task.find({period: (parseInt(params.period) - 1) === 0 ? 53 : parseInt(params.period) - 1, status: {$ne: 2}, user: params.userId, create_at:{$regex: /2020/i}}); //edited the year condition by karl on 2019-01-03
 	var res = [];
 	await query.exec((err, tasks) => {
 		if (err) {

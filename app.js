@@ -36,9 +36,9 @@ const mongoOptions = {
 	pass: 'tt'
 };
 
-const db = 'mongodb://tt:tt@111.229.235.175:27017/tt';// 连接本地mongoDB
+// const db = 'mongodb://tt:tt@111.229.235.175:27017/tt';// 连接本地mongoDB
 // const db = 'mongodb://172.19.3.65:27017/weekTask';// 连接开发机mongoDB
-// const db = 'mongodb://'+ MONGO_HOST +'/weekTask';// 连接线上mongoDB
+const db = 'mongodb://localhost/weekTask';// 连接线上mongoDB
 
 mongoose.Promise = require('bluebird');
 mongoose.set('useCreateIndex', true);
