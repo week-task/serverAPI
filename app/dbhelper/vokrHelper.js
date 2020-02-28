@@ -81,6 +81,7 @@ const editVokr = async (params) => {
   var query = Vokr.findByIdAndUpdate(params.id, {
     dealer: params.dealer,
     gscore: params.gscore,
+    grade: params.grade,
     total_score: params.total_score,
     status: params.status,
     comment: params.comment,
