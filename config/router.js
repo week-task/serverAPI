@@ -52,6 +52,7 @@ module.exports = function () {
 	router.post('/team/edit', Team.editTeam);
 	router.post('/team/delete', Team.deleteTeam);
 	router.post('/team/addLeader', Team.addTeamLeader);
+	router.post('/team/getLeaderInfoByTeam', Team.getLeaderInfoByTeam);
 
 	// project 接口
 	router.post('/getProjectListByTeam', Project.getProjectOptions);

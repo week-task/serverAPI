@@ -455,11 +455,12 @@ exports.getUserList = async (ctx, next) => {
 	} else if (type = 'okr') { // added by karl on 2020-02-25 新增一个类型OKR
 		var year = xss(ctx.request.body.year);
 		var month = xss(ctx.request.body.month);
+		var dealer = xss(ctx.request.body.dealer);
 		var kokrList, vokrList;
 		userList = await userHelper.findUsersByTeam({ team: team, okr: 'okr' });
 		kokrList = await kokrHelper.findKokrByYearMonth({ team: team, year: year, month: month });
-		vokrList = await vokrHelper.findVokrByYearMonth({ team: team, year: year, month: month });
-		const formatUserOkrList = formatUserOkrData(userList, kokrList, vokrList);
+		vokrList = await vokrHelper.findVokrByYearMonth({ team: team, year: year, month: month, dealer: dealer });
+		const formatUserOkrList = formatUserOkrData(userList, kokrList, vokrList, dealer);
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
@@ -730,7 +731,7 @@ function formatUserInfoData (data) {
  * @param data
  * @returns {Array}
  */
-function formatUserOkrData (userData, kokrData, vokrData) {
+function formatUserOkrData (userData, kokrData, vokrData, dealer) {
 	var reData = [];
 
 	for (var i = 0, size = userData.length; i < size; i++) {
@@ -765,7 +766,7 @@ function formatUserOkrData (userData, kokrData, vokrData) {
 			}
 		}
     for (var k = 0, sizeK = vokrData.length; k < sizeK; k++) {
-      var itemK = vokrData[j];
+      var itemK = vokrData[k];
       if (itemM.id.toString() === itemK.creator.toString()) {
         reData[m]['vokrData'] = itemK;
       }

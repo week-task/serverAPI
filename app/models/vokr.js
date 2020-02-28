@@ -31,11 +31,14 @@ var VokrSchema = new Schema({
 	// desc: String, // 填报具体的key内容的一些补充描述
 	// score: Number, // 每个key的自评分数
 	gscore: Number, // 每个key的小组长分数,占比30%,此字段暂时不用
+  total_score: Number, // 每个人算的总分数
   grade: String,
-	// 1 -> 初始状态,组员指定下月计划并填写key,此时dealer为组员本人
+	// 1 -> 初始状态,组员指定下月计划并填写value,此时dealer为组员本人
 	// 2 -> 初评完成,组员对自己当月计划进行评分,此时dealer为小组长
 	// 10 -> 小组长审核通过,小组长审核评分通过,认可权重和分数,此时dealer为TL
 	// 11 -> 小组长审核驳回,小组长不任何,此时dealer为组员本人
+  // 12 -> 小组长写自己的任务,此时dealer为小组长本人
+  // 13 -> 小组长写自己的任务,此时dealer为TL
 	// 20 -> TL审核通过
 	// 21 -> TL审核驳回
 	status: String, // key的状态

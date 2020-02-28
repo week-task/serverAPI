@@ -65,6 +65,32 @@ exports.getTeamLeaderList = async(ctx, next) => {
 };
 
 /**
+ * 根据team id查找Leader信息
+ * @param {[type]}   ctx   [description]
+ * @param {Function} next  [description]
+ * @yield {[type]}         [description]
+ */
+exports.getLeaderInfoByTeam = async (ctx, next) => {
+  var teamId = xss(ctx.request.body.id);
+  var existUser = await teamHelper.findTeam(teamId);
+
+  if (existUser) {
+    var reUser = {
+      _id: existUser.leader._id,
+      name: existUser.leader.name,
+      role: existUser.leader.role,
+      team: existUser.leader.team
+    }
+    ctx.status = 200;
+    ctx.body = {
+      code: 0,
+      data: reUser,
+      message: '获取Leader成功'
+    }
+  }
+};
+
+/**
  * 新增team leader
  * @param  {[type]}   ctx  [description]
  * @param  {Function} next [description]

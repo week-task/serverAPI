@@ -18,23 +18,23 @@ import vokrHelper from '../dbhelper/vokrHelper';
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-exports.getVokrsList = async(ctx, next) => {
-	var data = await vokrHelper.findAllVokrs();
-	if(data && data.length > 0) {
-		ctx.status = 200;
-		ctx.body = {
-			code: 0,
-			data: data,
-			message: '获取成功'
-		};
-	} else {
-		ctx.status = 200;
-		ctx.body = {
-			code: 0,
-			data: [],
-			message: '没有数据'
-		};
-	}
+exports.getVokrsList = async (ctx, next) => {
+  var data = await vokrHelper.findAllVokrs();
+  if (data && data.length > 0) {
+    ctx.status = 200;
+    ctx.body = {
+      code: 0,
+      data: data,
+      message: '获取成功'
+    };
+  } else {
+    ctx.status = 200;
+    ctx.body = {
+      code: 0,
+      data: [],
+      message: '没有数据'
+    };
+  }
 };
 
 
@@ -49,8 +49,9 @@ exports.addVokr = async (ctx, next) => {
   var dealer = xss(ctx.request.body.dealer);
   var year = xss(ctx.request.body.year);
   var month = xss(ctx.request.body.month);
-  var gscore = ctx.request.body.gscore;
-  var grade = ctx.request.body.grade;
+  var gscore = xss(ctx.request.body.gscore);
+  var total_score = xss(ctx.request.body.total_score);
+  var grade = xss(ctx.request.body.grade);
   var status = xss(ctx.request.body.status);
   var comment = xss(ctx.request.body.comment);
   var comment_self = xss(ctx.request.body.comment_self);
@@ -73,7 +74,8 @@ exports.addVokr = async (ctx, next) => {
     var editVokr = {
       id: data[0]._id,
       dealer: dealer,
-      gscore: gscore,
+      gscore: parseInt(gscore),
+      total_score: parseFloat(total_score),
       grade: grade,
       status: status,
       comment: comment,
@@ -88,14 +90,15 @@ exports.addVokr = async (ctx, next) => {
       _id: new mongoose.Types.ObjectId(),
       creator: last_person,
       dealer: last_person,
-      gscore: 0,
-      grade: '',
+      gscore: parseInt(gscore),
+      total_score: parseFloat(total_score),
+      grade: grade,
       team: team,
       year: year,
       month: month,
-      status: '1',
-      comment: '',
-      comment_self: '',
+      status: status,
+      comment: comment,
+      comment_self: comment_self,
       last_person: last_person,
       content: content,
       create_at: moment().format("YYYY-MM-DD HH:mm:ss"),

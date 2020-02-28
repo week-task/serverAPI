@@ -48,7 +48,14 @@ const findVokrByUserId = async (params) => {
  * @return {[type]} [description]
  */
 const findVokrByYearMonth = async (params) => {
-  var query = Vokr.find({ team: params.team, year: params.year, month: params.month });
+
+  var objurl;
+  if (params.dealer === 'all') {
+    objurl = { team: params.team, year: params.year, month: params.month }
+  } else {
+    objurl = { team: params.team, year: params.year, month: params.month, dealer: params.dealer }
+  }
+  var query = Vokr.find(objurl);
   var res = [];
   await query.exec(function (err, vokr) {
     if (err) {
@@ -74,8 +81,10 @@ const editVokr = async (params) => {
   var query = Vokr.findByIdAndUpdate(params.id, {
     dealer: params.dealer,
     gscore: params.gscore,
+    total_score: params.total_score,
     status: params.status,
     comment: params.comment,
+    comment_self: params.comment_self,
     last_person: params.last_person,
     content: params.content,
     update_at: params.update_at
