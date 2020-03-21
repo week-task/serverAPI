@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var Vokr = mongoose.model('Vokr');
 var User = mongoose.model('User');
 import userHelper from '../dbhelper/userHelper';
+import kokrHelper from '../dbhelper/kokrHelper';
 import vokrHelper from '../dbhelper/vokrHelper';
 
 /**
@@ -114,7 +115,7 @@ exports.addVokr = async (ctx, next) => {
     ctx.body = {
       code: 0,
       data: res,
-      message: (data && data.length > 0) ? `修改${year}年${month}月OKR VALUE成功` : `新增${year}年${month}月OKR VALUE成功`
+      message: (data && data.length > 0) ? `修改${year}年${month}月OKR 绩效成果成功` : `新增${year}年${month}月OKR 绩效成果成功`
     }
   }
 };
@@ -138,12 +139,81 @@ exports.getValueOkrByUserId = async (ctx, next) => {
     team: team
   };
   var data = await vokrHelper.findVokrByUserId(params);
-  console.log('get ddd', data)
+  // console.log('get ddd', data)
   // var plans = renderPlans(data);
   ctx.body = {
     code: 0,
     data: data,
     message: '获取OKR成功'
+  }
+};
+
+/**
+ * 根据userId、year和month查询vokr
+ * @param  {[type]}   ctx  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.copyKokrByUser = async (ctx, next) => {
+  var creator = xss(ctx.request.body.creator);
+  var year = xss(ctx.request.body.year);
+  var month = xss(ctx.request.body.month);
+  var team = xss(ctx.request.body.team);
+
+  var params = {
+    creator: creator,
+    year: year,
+    month: month,
+    team: team
+  };
+
+  var kokrValue = await kokrHelper.findKokrByUserId(params);
+  var vokrValue = await vokrHelper.findVokrByUserId(params);
+
+  if (kokrValue && kokrValue.length <= 0) {
+    ctx.body = {
+      code: 0,
+      data: [],
+      message: '本月绩效目标无数据'
+    }
+    return
+  }
+
+  if (vokrValue && vokrValue.length > 0) {
+    ctx.body = {
+      code: 0,
+      data: [],
+      message: '已存在绩效目标,无法复制'
+    }
+    return
+  }
+
+  var vokr = new Vokr({
+    _id: new mongoose.Types.ObjectId(),
+    creator: kokrValue[0].creator,
+    dealer: kokrValue[0].creator,
+    gscore: 100,
+    total_score: 0,
+    grade: 'C',
+    team: team,
+    year: year,
+    month: month,
+    status: '1',
+    comment: '',
+    comment_self: '',
+    last_person: kokrValue[0].creator,
+    content: kokrValue[0].content,
+    create_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+    update_at: moment().format("YYYY-MM-DD HH:mm:ss")
+  });
+
+  var data = await vokrHelper.addVokr(vokr);
+  // console.log('get ddd', data)
+  // var plans = renderPlans(data);
+  ctx.body = {
+    code: 0,
+    data: data,
+    message: `复制${year}年${month}月OKR 成功`
   }
 };
 

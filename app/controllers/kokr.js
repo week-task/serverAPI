@@ -87,7 +87,7 @@ exports.getOkrByUserId = async (ctx, next) => {
     team: team
   };
   var data = await kokrHelper.findKokrByUserId(params);
-  console.log('get ddd', data)
+  // console.log('get ddd', data)
   // var plans = renderPlans(data);
   ctx.body = {
     code: 0,

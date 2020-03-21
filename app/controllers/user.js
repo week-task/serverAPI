@@ -460,7 +460,7 @@ exports.getUserList = async (ctx, next) => {
 		userList = await userHelper.findUsersByTeam({ team: team, okr: 'okr' });
 		kokrList = await kokrHelper.findKokrByYearMonth({ team: team, year: year, month: month });
 		vokrList = await vokrHelper.findVokrByYearMonth({ team: team, year: year, month: month, dealer: dealer });
-		const formatUserOkrList = formatUserOkrData(userList, kokrList, vokrList, dealer);
+		const formatUserOkrList = formatUserOkrData(userList, kokrList, vokrList, dealer, year, month);
 		if (userList) {
 			ctx.status = 200;
 			ctx.body = {
@@ -731,12 +731,12 @@ function formatUserInfoData (data) {
  * @param data
  * @returns {Array}
  */
-function formatUserOkrData (userData, kokrData, vokrData, dealer) {
+function formatUserOkrData (userData, kokrData, vokrData, dealer, year, month) {
 	var reData = [];
 
 	for (var i = 0, size = userData.length; i < size; i++) {
 		var item = userData[i];
-		reData.push({
+    reData.push({
 			id: item._id,
 			avatar: item.avatar,
 			name: item.name,
@@ -753,25 +753,30 @@ function formatUserOkrData (userData, kokrData, vokrData, dealer) {
       kokrData: {},
       vokrData: {}
 		});
-	}
-	if (!kokrData || kokrData.length <= 0) {
-		return reData;
-	}
-	for (var m = 0, sizeM = reData.length; m < sizeM; m++) {
+  }
+  // if (!(year === '2020' && month === '2') && (!kokrData || kokrData.length <= 0)) {
+  //   return reData;
+  // }
+  for (var m = 0, sizeM = reData.length; m < sizeM; m++) {
 		var itemM = reData[m];
-		for (var j = 0, sizeJ = kokrData.length; j < sizeJ; j++) {
-			var itemJ = kokrData[j];
-			if (itemM.id.toString() === itemJ.creator.toString()) {
-				reData[m]['kokrData'] = itemJ;
-			}
-		}
-    for (var k = 0, sizeK = vokrData.length; k < sizeK; k++) {
-      var itemK = vokrData[k];
-      if (itemM.id.toString() === itemK.creator.toString()) {
-        reData[m]['vokrData'] = itemK;
+    if (kokrData && kokrData.length > 0) {
+      for (var j = 0, sizeJ = kokrData.length; j < sizeJ; j++) {
+        var itemJ = kokrData[j];
+        if (itemM.id.toString() === itemJ.creator.toString()) {
+          reData[m]['kokrData'] = itemJ;
+        }
+      }
+    }
+    if (vokrData && vokrData.length > 0) {
+      for (var k = 0, sizeK = vokrData.length; k < sizeK; k++) {
+        var itemK = vokrData[k];
+        if (itemM.id.toString() === itemK.creator.toString()) {
+          reData[m]['vokrData'] = itemK;
+        }
       }
     }
 	}
+
 	return reData;
 }
 

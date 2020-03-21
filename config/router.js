@@ -69,6 +69,7 @@ module.exports = function () {
   // vokr 接口
   router.post('/vokr/add', Vokr.addVokr);
   router.post('/vokr/getValueOkrByUserId', Vokr.getValueOkrByUserId);
+  router.post('/vokr/copy', Vokr.copyKokrByUser);
 
 	return router;
 }

@@ -15,6 +15,7 @@ var KokrSchema = new Schema({
 	month: String, // 填报的月份
 	content: [
 		{
+		  time: String,
 			kind: String,
 			percent: Number,
 			title: String,

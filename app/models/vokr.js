@@ -19,6 +19,7 @@ var VokrSchema = new Schema({
 	month: String, // 填报的月份
 	content: [
 		{
+		  time: String,
 			kind: String,
       title: String,
 			percent: Number,
