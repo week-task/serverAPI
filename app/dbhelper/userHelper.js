@@ -169,10 +169,12 @@ const editUser = async (params) => {
 const editUserInfo = async (params) => {
 
 	var query = User.update({_id: params.userId}, {$set:{
-		motto:params.motto,
-		tel: params.tel,
-		email: params.email,
-		intro: params.intro
+      motto:params.motto,
+      tel: params.tel,
+      email: params.email,
+      intro: params.intro,
+      workNo: params.workNo,
+      workContent: params.workContent
 	}});
 	var res = [];
 	await query.exec((err, user) => {
@@ -369,6 +371,23 @@ const addUserPRoleField4User = async (params) => {
 	});
 	return res;
 };
+/**
+ * 新增 user表字段 workNo workContent
+ * @param {*} params String
+ * @return {[User]}
+ */
+const addUserWorkField4User = async (params) => {
+	var query = User.update({},{$set: {workNo: '', workContent: ''}}, {multi: true});
+	var res = [];
+	await query.exec((err, user) => {
+		if (err) {
+			res = [];
+		} else {
+			res = user;
+		}
+	});
+	return res;
+};
 
 /**
  * 新增老版本的用户字段intro, frozen_time, all_time
@@ -440,6 +459,7 @@ module.exports = {
 	updateUserParentSelf,
 	findUsersByParent,
 	addEnergyField4User,
+  addUserWorkField4User,
 	updateEnergy4User,
 	addEnergyTimeField4User,
 	addUserPRoleField4User,

@@ -33,6 +33,8 @@ var UserSchema = new Schema({
 	tel: Number, // 电话
 	email: String, // 邮件
 	intro: String, // 自我介绍
+  workNo: String, //
+  workContent: String,
 	frozen_time: Number, // 冻结的请假时间
 	all_time: Number // 所有的请假时间
 },{collection:'user'});

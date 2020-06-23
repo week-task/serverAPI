@@ -111,7 +111,8 @@ exports.addTeamLeader = async(ctx, next) => {
 		salt: salt,
 		role: 0,
 		status: 0,
-		parent: self
+		parent: self,
+    p_role: 1
 	});
 	var user = await userHelper.addUser(leader);
 

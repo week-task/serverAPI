@@ -239,9 +239,11 @@ exports.editUserInfo = async (ctx, next) => {
 	var tel = xss(ctx.request.body.tel);
 	var email = xss(ctx.request.body.email);
 	var intro = xss(ctx.request.body.intro);
+	var workNo = xss(ctx.request.body.workNo);
+	var workContent = xss(ctx.request.body.workContent);
 	var team = xss(ctx.request.body.team);
 
-	var updateUser = await userHelper.editUserInfo({ userId: userId, motto: motto, tel: tel, email: email, intro: intro });
+	var updateUser = await userHelper.editUserInfo({ userId: userId, motto: motto, tel: tel, email: email, intro: intro, workNo: workNo, workContent: workContent });
 
 	if (updateUser) {
 		ctx.status = 200;
@@ -716,6 +718,8 @@ function formatUserInfoData (data) {
 			tel: item.tel,
 			email: item.email,
 			intro: item.intro,
+			workNo: item.workNo,
+      workContent: item.workContent,
 			energy: item.energy,
 			energy_desc: item.energy_desc,
 			color: item.color,
